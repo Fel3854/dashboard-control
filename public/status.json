@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-05T00:57:11.297Z",
+  "timestamp": "2026-06-05T01:01:40.316Z",
   "proyectos": [
     {
       "nombre": "ERP Masterbus",
       "estado": "OK",
-      "latencia_ms": 1114,
+      "latencia_ms": 881,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-05T00:57:11.297Z"
