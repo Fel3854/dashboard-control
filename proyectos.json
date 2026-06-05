@@ -1,0 +1,41 @@
+[
+  {
+    "nombre": "Sistema Cubiertas",
+    "tipo": "pull",
+    "url": "https://COMPLETAR-cubiertas.vercel.app/",
+    "plataforma": "Vercel"
+  },
+  {
+    "nombre": "Consultas BD Mantenimiento",
+    "tipo": "pull",
+    "url": "https://COMPLETAR-backend.onrender.com/health",
+    "plataforma": "Render",
+    "tolera_cold_start": true
+  },
+  {
+    "nombre": "Controles Stock Telegram",
+    "tipo": "pull",
+    "url": "https://COMPLETAR-service.run.app/health",
+    "plataforma": "Cloud Run",
+    "tolera_cold_start": true
+  },
+  {
+    "nombre": "Sistema Compras",
+    "tipo": "pull",
+    "url": "https://COMPLETAR-compras.up.railway.app/health",
+    "plataforma": "Railway"
+  },
+  {
+    "nombre": "ERP Masterbus",
+    "tipo": "pull",
+    "url": "https://mantenimiento.masterbus.net/",
+    "plataforma": "propio",
+    "es_dependencia": true
+  },
+  {
+    "nombre": "Rotacion",
+    "tipo": "heartbeat",
+    "max_silencio_horas": 26,
+    "plataforma": "local"
+  }
+]

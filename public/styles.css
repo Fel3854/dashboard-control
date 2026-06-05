@@ -1,0 +1,182 @@
+/* Branding Master Bus — light mode (ver DESIGN.md) */
+:root {
+  --primario: #ed5d3b;
+  --alerta: #d12f19;
+  --fondo: #ededed;
+  --texto: #333;
+  --radius: 4px;
+
+  --blanco: #fff;
+  --borde: #d8d8d8;
+  --suave: #6b6b6b;
+
+  /* Semaforo */
+  --verde: #2e9e4f;
+  --amarillo: #e0a400;
+  --rojo: var(--alerta);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.4;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--blanco);
+  border-bottom: 3px solid var(--primario);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.titulos h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.subtitulo {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--suave);
+}
+
+/* ── Contenedor ── */
+.contenedor {
+  max-width: 860px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.meta-check {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--suave);
+}
+
+.resumen {
+  font-weight: bold;
+}
+
+/* ── Panel / filas ── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-left: 5px solid var(--borde);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+}
+
+.fila.ok {
+  border-left-color: var(--verde);
+}
+.fila.lento,
+.fila.despertando {
+  border-left-color: var(--amarillo);
+}
+.fila.caido {
+  border-left-color: var(--rojo);
+}
+
+.semaforo {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.info .nombre {
+  font-weight: bold;
+}
+
+.info .plataforma {
+  font-size: 0.8rem;
+  color: var(--suave);
+}
+
+.info .desde {
+  font-size: 0.8rem;
+  color: var(--alerta);
+  margin-top: 2px;
+}
+
+.metricas {
+  text-align: right;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.metricas .estado-label {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--blanco);
+}
+
+.estado-label.ok {
+  background: var(--verde);
+}
+.estado-label.lento,
+.estado-label.despertando {
+  background: var(--amarillo);
+}
+.estado-label.caido {
+  background: var(--rojo);
+}
+
+.metricas .latencia {
+  display: block;
+  margin-top: 4px;
+  color: var(--suave);
+}
+
+/* ── Estados especiales ── */
+.error {
+  background: #fdecea;
+  border: 1px solid var(--alerta);
+  border-radius: var(--radius);
+  color: var(--alerta);
+  padding: 12px 16px;
+}
+
+.vacio {
+  text-align: center;
+  color: var(--suave);
+  padding: 24px;
+}
+
+.pie {
+  text-align: center;
+  color: var(--suave);
+  font-size: 0.75rem;
+  padding: 24px 16px;
+}

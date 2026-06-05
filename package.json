@@ -1,0 +1,14 @@
+{
+  "name": "dashboard-control",
+  "version": "1.0.0",
+  "description": "Panel de control para monitorear si los proyectos del ecosistema Master Bus estan online (Fase 1: checker pull + estado + panel estatico).",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "check": "node checker/check.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

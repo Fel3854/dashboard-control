@@ -1,0 +1,20 @@
+[
+  {
+    "nombre": "Sitio de ejemplo (OK)",
+    "tipo": "pull",
+    "url": "https://example.com",
+    "plataforma": "Demo"
+  },
+  {
+    "nombre": "Servicio inexistente (CAIDO)",
+    "tipo": "pull",
+    "url": "https://no-existe-xyz.invalid/",
+    "plataforma": "Demo"
+  },
+  {
+    "nombre": "Rotacion (heartbeat, se omite en Fase 1)",
+    "tipo": "heartbeat",
+    "max_silencio_horas": 26,
+    "plataforma": "local"
+  }
+]

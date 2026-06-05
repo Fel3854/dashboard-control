@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-06-05T00:48:30.890Z",
+  "proyectos": [
+    {
+      "nombre": "Sitio de ejemplo (OK)",
+      "estado": "OK",
+      "latencia_ms": 182,
+      "http_code": 200,
+      "plataforma": "Demo",
+      "desde": "2026-06-05T00:48:06.608Z"
+    },
+    {
+      "nombre": "Servicio inexistente (CAIDO)",
+      "estado": "CAIDO",
+      "latencia_ms": 8,
+      "http_code": null,
+      "plataforma": "Demo",
+      "desde": "2026-06-05T00:48:06.608Z"
+    }
+  ]
+}

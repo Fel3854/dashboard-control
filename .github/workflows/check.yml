@@ -1,0 +1,63 @@
+name: Check & Deploy
+
+# Corre el checker cada 10 min, commitea status.json y publica el panel en GitHub Pages.
+# Pre-requisito: Settings -> Pages -> Source = "GitHub Actions" (una sola vez).
+on:
+  schedule:
+    - cron: '*/10 * * * *' # cada 10 min (el minimo real de Actions es ~5 min; puede demorarse)
+  workflow_dispatch: {} # permite correr manual ("Check now")
+
+# contents: write -> commitear status.json | pages+id-token: write -> deploy a Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Evita corridas pisandose entre si (no cancela un deploy en curso).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Lee public/status.json previo (del checkout) y escribe el nuevo.
+      - name: Correr checker
+        run: node checker/check.js
+
+      # Persiste el estado para poder calcular "desde" en la proxima corrida.
+      - name: Commitear status.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/status.json
+          if git diff --staged --quiet; then
+            echo "Sin cambios en status.json"
+          else
+            git commit -m "chore: update status.json [skip ci]"
+            git push
+          fi
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artifact (public/)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy a Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

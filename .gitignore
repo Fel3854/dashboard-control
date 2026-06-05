@@ -1,0 +1,11 @@
+# Dependencias (no deberia haber, pero por las dudas)
+node_modules/
+
+# Logs y temporales
+*.log
+.DS_Store
+
+# Entorno local (Fase 2: SMTP, tokens). NUNCA commitear secretos.
+.env
+.env.*
+!.env.example

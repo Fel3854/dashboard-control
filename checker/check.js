@@ -1,0 +1,222 @@
+// checker/check.js — Fase 1 del Dashboard de Control (Master Bus)
+//
+// Lee `proyectos.json`, pinguea cada target tipo "pull" con timeout y reintentos
+// (backoff), calcula estado + latencia, y escribe `public/status.json`.
+//
+// Sin dependencias: usa `fetch` nativo, `AbortSignal.timeout` y `node:fs` (Node 20+).
+// La logica de DECISION de estado (`decidirEstado`) es PURA e importable para testearla
+// sin red (ver checker/check.test.js).
+
+import { readFile, writeFile, access } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+// ── Constantes de la logica de chequeo ───────────────────────────────────────
+export const TIMEOUT_MS = 10_000; // corte por request
+export const LENTO_MS = 3_000; // umbral OK vs LENTO
+export const DELAYS = [0, 2_000, 5_000]; // 3 intentos; delay ANTES de cada intento (0s, 2s, 5s)
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const RAIZ = resolve(__dirname, '..');
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Pausa `ms` milisegundos. Inyectable en tests con un no-op para no esperar. */
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** True si la URL ya esta configurada (no es un placeholder del proyectos.json). */
+export function urlConfigurada(url) {
+  return (
+    typeof url === 'string' &&
+    /^https?:\/\//i.test(url) &&
+    !url.includes('COMPLETAR') &&
+    !url.includes('<')
+  );
+}
+
+// ── Un intento de GET ───────────────────────────────────────────────────────
+
+/**
+ * Hace UN GET y mide la latencia. No lanza: cualquier error/timeout se devuelve
+ * como `{ ok: false }`.
+ *
+ * @returns {{ ok: boolean, http_code: number|null, latencia_ms: number, error?: string }}
+ *   ok = respondio con status 2xx/3xx.
+ */
+export async function intentarUna(url, { timeout = TIMEOUT_MS, fetchImpl = globalThis.fetch } = {}) {
+  const inicio = performance.now();
+  try {
+    const res = await fetchImpl(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(timeout),
+    });
+    const latencia_ms = Math.round(performance.now() - inicio);
+    const http_code = res.status;
+    return { ok: http_code >= 200 && http_code < 400, http_code, latencia_ms };
+  } catch (err) {
+    const latencia_ms = Math.round(performance.now() - inicio);
+    return { ok: false, http_code: null, latencia_ms, error: String(err?.message ?? err) };
+  }
+}
+
+// ── Decision de estado (PURA — el corazon testeable) ──────────────────────────
+
+/**
+ * Decide el estado a partir de los resultados de los intentos. Pura, sin red.
+ *
+ * Estados:
+ *  - OK          : respondio 2xx/3xx con latencia < lentoMs.
+ *  - LENTO       : respondio pero la latencia supera lentoMs.
+ *  - CAIDO       : ningun intento respondio 2xx/3xx.
+ *  - DESPERTANDO : fallo el 1er intento pero respondio en un reintento,
+ *                  SOLO si el target tolera cold start.
+ *
+ * Nota: un target SIN tolera_cold_start que falla el 1er intento pero responde en un
+ * reintento queda OK/LENTO segun latencia (el reintento "lo salva"). DESPERTANDO solo
+ * aparece con toleraColdStart: true.
+ *
+ * @param {Array<{ok:boolean, latencia_ms:number}>} intentos
+ * @param {{toleraColdStart?:boolean, lentoMs?:number}} opciones
+ * @returns {'OK'|'LENTO'|'CAIDO'|'DESPERTANDO'}
+ */
+export function decidirEstado(intentos, { toleraColdStart = false, lentoMs = LENTO_MS } = {}) {
+  const exitosos = intentos.filter((i) => i.ok);
+  if (exitosos.length === 0) return 'CAIDO';
+
+  const primerFallo = !intentos[0].ok;
+  const exitoso = exitosos[0];
+
+  if (toleraColdStart && primerFallo) return 'DESPERTANDO';
+  if (exitoso.latencia_ms >= lentoMs) return 'LENTO';
+  return 'OK';
+}
+
+// ── Chequeo completo de un target (con reintentos) ────────────────────────────
+
+/**
+ * Pinguea un target con reintentos/backoff y devuelve estado + metricas.
+ * Corte temprano: si un intento responde ok, no reintenta mas.
+ *
+ * @returns {{estado:string, latencia_ms:number, http_code:number|null, intentos:number}}
+ */
+export async function chequearTarget(
+  target,
+  { fetchImpl = globalThis.fetch, sleep: sleepImpl = sleep, delays = DELAYS, timeout = TIMEOUT_MS } = {},
+) {
+  const intentos = [];
+  for (const delay of delays) {
+    if (delay > 0) await sleepImpl(delay);
+    const r = await intentarUna(target.url, { timeout, fetchImpl });
+    intentos.push(r);
+    if (r.ok) break; // ya respondio, no hace falta seguir reintentando
+  }
+
+  const estado = decidirEstado(intentos, { toleraColdStart: Boolean(target.tolera_cold_start) });
+  // El intento que define el resultado: el exitoso si lo hubo, si no el ultimo.
+  const definitorio = intentos.find((i) => i.ok) ?? intentos[intentos.length - 1];
+
+  return {
+    estado,
+    latencia_ms: definitorio.latencia_ms,
+    http_code: definitorio.http_code,
+    intentos: intentos.length,
+  };
+}
+
+// ── Calculo de "desde cuando esta asi" ────────────────────────────────────────
+
+/**
+ * Compara contra el status anterior: si el proyecto seguia en el mismo estado,
+ * conserva su `desde`; si cambio (o es nuevo), `desde` = ahora.
+ */
+export function resolverDesde(nombre, estadoNuevo, statusAnterior, ahoraISO) {
+  const previo = statusAnterior?.proyectos?.find((p) => p.nombre === nombre);
+  if (previo && previo.estado === estadoNuevo && previo.desde) return previo.desde;
+  return ahoraISO;
+}
+
+// ── Lectura de archivos ───────────────────────────────────────────────────────
+
+async function leerJSON(ruta) {
+  const txt = await readFile(ruta, 'utf8');
+  return JSON.parse(txt);
+}
+
+async function existe(ruta) {
+  try {
+    await access(ruta);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── main ──────────────────────────────────────────────────────────────────────
+
+export async function main() {
+  const configPath = resolve(RAIZ, process.env.PROYECTOS_FILE || process.argv[2] || 'proyectos.json');
+  const statusPath = resolve(RAIZ, process.env.STATUS_FILE || 'public/status.json');
+
+  const targets = await leerJSON(configPath);
+  const anterior = (await existe(statusPath)) ? await leerJSON(statusPath) : null;
+
+  const ahoraISO = new Date().toISOString();
+
+  // Fase 1: solo targets "pull" con URL configurada. Heartbeat y placeholders se saltean.
+  const aChequear = [];
+  for (const t of targets) {
+    if (t.tipo !== 'pull') {
+      console.warn(`↷ Omitido (tipo "${t.tipo}", se monitorea en Fase 3): ${t.nombre}`);
+      continue;
+    }
+    if (!urlConfigurada(t.url)) {
+      console.warn(`↷ Omitido (URL sin configurar): ${t.nombre} -> ${t.url}`);
+      continue;
+    }
+    aChequear.push(t);
+  }
+
+  const proyectos = [];
+  for (const t of aChequear) {
+    const r = await chequearTarget(t);
+    const desde = resolverDesde(t.nombre, r.estado, anterior, ahoraISO);
+    proyectos.push({
+      nombre: t.nombre,
+      estado: r.estado,
+      latencia_ms: r.latencia_ms,
+      http_code: r.http_code,
+      plataforma: t.plataforma ?? null,
+      desde,
+    });
+    console.log(`• ${t.nombre.padEnd(32)} ${r.estado.padEnd(11)} ${r.latencia_ms}ms  http=${r.http_code ?? '-'}`);
+  }
+
+  const nuevo = { timestamp: ahoraISO, proyectos };
+
+  await writeFile(statusPath, JSON.stringify(nuevo, null, 2) + '\n', 'utf8');
+  console.log(`\n✓ status.json escrito (${proyectos.length} proyecto/s) -> ${statusPath}`);
+
+  // ── Hook Fase 2 (alertas por email) ─────────────────────────────────────────
+  // notify.js todavia NO existe en Fase 1. Cuando se cree (exportando `notify`),
+  // se llamara automaticamente aca, despues de escribir status.json, sin tocar este archivo.
+  try {
+    const { notify } = await import('./notify.js');
+    await notify({ nuevo, anterior, dryRun: process.env.DRY_RUN === '1' });
+  } catch (err) {
+    if (err?.code !== 'ERR_MODULE_NOT_FOUND') {
+      console.error('notify.js fallo:', err?.message ?? err);
+    }
+    // Si no existe el modulo (Fase 1), se ignora en silencio.
+  }
+
+  return nuevo;
+}
+
+// Solo corre main() si se ejecuta directamente (no al importarlo en tests).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error('Error en el checker:', err);
+    process.exit(1);
+  });
+}
