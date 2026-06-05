@@ -1,3 +1,29 @@
 {
-  "eventos": []
+  "eventos": [
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "OK",
+      "timestamp": "2026-06-05T00:57:11.297Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-06-05T01:40:43.709Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-06-05T01:40:43.709Z"
+    },
+    {
+      "nombre": "Controles Stock Telegram",
+      "estado": "OK",
+      "timestamp": "2026-06-05T01:40:43.709Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "SIN_DATOS",
+      "timestamp": "2026-06-05T01:56:29.360Z"
+    }
+  ]
 }
