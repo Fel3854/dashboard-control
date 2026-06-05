@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-05T01:56:29.360Z",
+  "timestamp": "2026-06-05T05:23:53.009Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 806,
+      "latencia_ms": 1071,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -16,7 +16,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 127,
+      "latencia_ms": 235,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -26,7 +26,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 88,
+      "latencia_ms": 203,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -36,7 +36,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 818,
+      "latencia_ms": 601,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-05T00:57:11.297Z",
@@ -51,7 +51,7 @@
       "plataforma": "local",
       "desde": "2026-06-05T01:56:29.360Z",
       "ultima_corrida": null,
-      "uptime": null
+      "uptime": 0
     }
   ]
 }
