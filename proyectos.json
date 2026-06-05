@@ -2,20 +2,20 @@
   {
     "nombre": "Sistema Cubiertas",
     "tipo": "pull",
-    "url": "https://COMPLETAR-cubiertas.vercel.app/",
+    "url": "https://sist-cubiertas.vercel.app/",
     "plataforma": "Vercel"
   },
   {
     "nombre": "Consultas BD Mantenimiento",
     "tipo": "pull",
-    "url": "https://COMPLETAR-backend.onrender.com/health",
+    "url": "https://masterbus-dashboard.onrender.com/health",
     "plataforma": "Render",
     "tolera_cold_start": true
   },
   {
     "nombre": "Controles Stock Telegram",
     "tipo": "pull",
-    "url": "https://COMPLETAR-service.run.app/health",
+    "url": "https://cycle-count-bot-259211746597.us-central1.run.app",
     "plataforma": "Cloud Run",
     "tolera_cold_start": true
   },
