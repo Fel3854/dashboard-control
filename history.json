@@ -34,6 +34,11 @@
       "nombre": "ERP Masterbus",
       "estado": "LENTO",
       "timestamp": "2026-06-05T19:23:04.786Z"
+    },
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "OK",
+      "timestamp": "2026-06-05T21:08:44.910Z"
     }
   ]
 }
