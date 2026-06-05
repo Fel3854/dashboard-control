@@ -21,6 +21,10 @@ concurrency:
 jobs:
   check-and-deploy:
     runs-on: ubuntu-latest
+    # MAIL_SERVER se expone como env para condicionar el step de email: si el secret no
+    # esta configurado, env queda vacio y el envio se saltea (no rompe el run).
+    env:
+      MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -33,18 +37,20 @@ jobs:
         with:
           node-version: '20'
 
-      # Lee public/status.json previo (del checkout) y escribe el nuevo.
+      # Lee public/status.json previo (del checkout), escribe el nuevo y, via el hook,
+      # corre notify.js: si hubo transicion, deja los outputs `alerta`/`asunto`.
       - name: Correr checker
+        id: checker
         run: node checker/check.js
 
-      # Persiste el estado para poder calcular "desde" en la proxima corrida.
-      - name: Commitear status.json
+      # Persiste status.json (para "desde") y alertas-estado.json (para el cooldown).
+      - name: Commitear estado
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/status.json
+          git add public/status.json alertas-estado.json
           if git diff --staged --quiet; then
-            echo "Sin cambios en status.json"
+            echo "Sin cambios en el estado"
           else
             git commit -m "chore: update status.json [skip ci]"
             git push
@@ -61,3 +67,18 @@ jobs:
       - name: Deploy a Pages
         id: deploy
         uses: actions/deploy-pages@v4
+
+      # Fase 2: envia el email SOLO si notify.js marco una alerta y hay SMTP configurado.
+      # Va al final para no bloquear el deploy si fallara el envio.
+      - name: Enviar alerta por email
+        if: steps.checker.outputs.alerta == 'true' && env.MAIL_SERVER != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ steps.checker.outputs.asunto }}
+          to: ${{ secrets.MAIL_TO }}
+          from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
+          body: file://alerta-cuerpo.txt

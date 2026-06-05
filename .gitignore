@@ -9,3 +9,6 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Cuerpo efimero del email de alerta (lo arma notify.js en cada corrida del Action).
+alerta-cuerpo.txt

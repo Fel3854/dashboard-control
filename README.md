@@ -5,9 +5,9 @@ sanos**. Un checker pinguea cada servicio cada 10 min (vía GitHub Actions), cal
 estado + latencia y escribe `public/status.json`; el panel estático (GitHub Pages) lo
 muestra con semáforos 🟢🟡🔴.
 
-> Fuente de verdad del diseño: [`DESIGN.md`](DESIGN.md). Esto es la **Fase 1**
-> (checker + estado + panel). El email (Fase 2) y el heartbeat (Fase 3) todavía no están,
-> pero el código ya está preparado para enchufarlos.
+> Fuente de verdad del diseño: [`DESIGN.md`](DESIGN.md). Incluye **Fase 1** (checker +
+> estado + panel) y **Fase 2** (alertas por email). Falta la **Fase 3** (heartbeat +
+> historial), pero el código ya está preparado para enchufarla.
 
 ## Requisitos
 
@@ -114,12 +114,56 @@ el `status.json` anterior.
 El cron de Actions tiene un mínimo de ~5 min y puede demorarse bajo carga; es aceptable
 para este caso.
 
-## Próximas fases (ya preparado, sin reescribir)
+## Fase 2 — Alertas por email
 
-- **Fase 2 — Email.** `check.js` ya llama a `checker/notify.js` **después** de escribir
-  `status.json` (si el archivo existe). Para activarlo: creá `checker/notify.js`
-  exportando `notify({ nuevo, anterior, dryRun })` y mandá el mail solo en la transición
-  `OK → CAÍDO`, con cooldown. SMTP en GitHub Secrets. Soporta `DRY_RUN=1` para probar sin
-  enviar.
-- **Fase 3 — Heartbeat.** Los targets `tipo: "heartbeat"` (ej. Rotación) hoy se omiten;
-  se sumarán acá junto con el historial y el % de uptime.
+`check.js` llama a [`checker/notify.js`](checker/notify.js) **después** de escribir
+`status.json`. `notify.js` detecta transiciones y aplica un cooldown anti-spam; **no manda
+SMTP** (sin dependencias): cuando corre en el Action, marca un output `alerta=true` y el
+step [`dawidd6/action-send-mail`](.github/workflows/check.yml) envía el mail.
+
+**Cuándo avisa** (un solo mail por corrida que agrupa los cambios):
+
+| Evento | Condición |
+|---|---|
+| 🔴 Caída | un proyecto pasó a `CAÍDO` (no lo estaba antes) |
+| 🔴 Sigue caído | continúa `CAÍDO` y pasaron ≥ N horas desde la última alerta (recordatorio) |
+| 🟢 Recuperado | estaba `CAÍDO` y volvió a responder |
+
+El estado de las alertas se persiste en `alertas-estado.json` (commiteado, igual que
+`status.json`) para que el cooldown sobreviva entre corridas.
+
+### Activar el email (una vez)
+
+1. **GitHub Secrets** — en el repo: **Settings → Secrets and variables → Actions → New
+   repository secret**. Creá:
+
+   | Secret | Ejemplo | Notas |
+   |---|---|---|
+   | `MAIL_SERVER` | `smtp.gmail.com` | Sin esto, el envío se saltea (no rompe el run). |
+   | `MAIL_PORT` | `465` | 465 (SSL) o 587 (STARTTLS). |
+   | `MAIL_USERNAME` | `masterbusdev@gmail.com` | Usuario SMTP. |
+   | `MAIL_PASSWORD` | *(App Password)* | En Gmail **no** es tu clave normal: generá un **App Password** (requiere 2FA). |
+   | `MAIL_TO` | `vos@ejemplo.com` | A quién avisar (coma-separado para varios). |
+
+2. Listo: ante la próxima transición `OK → CAÍDO`, llega el mail. **Nunca** se commitea
+   ningún secreto; viven solo en GitHub Secrets.
+
+### Probar sin enviar (dry-run)
+
+```bash
+DRY_RUN=1 PROYECTOS_FILE=proyectos.example.json node checker/check.js
+```
+
+Con `DRY_RUN=1`, `notify.js` **loguea** el asunto/cuerpo que mandaría pero no envía ni
+persiste. Variables útiles:
+
+| Var | Default | Para qué |
+|---|---|---|
+| `DRY_RUN` | (off) | `1` = no envía ni persiste (solo loguea). |
+| `ALERTA_COOLDOWN_HORAS` | `6` | Horas entre recordatorios de un mismo proyecto caído. |
+| `PANEL_URL` | (la de Pages) | Link al panel que se incluye en el mail. |
+
+## Fase 3 — Heartbeat (pendiente)
+
+Los targets `tipo: "heartbeat"` (ej. Rotación) hoy se omiten; se sumarán acá junto con el
+historial (`history.json`) y el % de uptime.
