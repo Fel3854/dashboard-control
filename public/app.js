@@ -9,6 +9,7 @@ const ESTADOS = {
   LENTO: { emoji: '🟡', clase: 'lento', label: 'LENTO' },
   DESPERTANDO: { emoji: '🟡', clase: 'despertando', label: 'DESPERTANDO' },
   CAIDO: { emoji: '🔴', clase: 'caido', label: 'CAIDO' },
+  SIN_DATOS: { emoji: '⚪', clase: 'sindatos', label: 'SIN DATOS' },
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -36,16 +37,26 @@ function horaLocal(iso) {
   return d.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function filaHTML(p) {
-  const info = ESTADOS[p.estado] ?? { emoji: '⚪', clase: '', label: p.estado || '?' };
-  const esCaido = p.estado === 'CAIDO';
-  const latencia = esCaido || p.latencia_ms == null ? '— ms' : `${p.latencia_ms} ms`;
+const VERBO = { CAIDO: 'caído', LENTO: 'lento', DESPERTANDO: 'despertando', SIN_DATOS: 'sin datos' };
 
-  // "desde" se muestra cuando el estado no es OK (caido/lento/despertando desde ...).
+function filaHTML(p, ventanaDias) {
+  const info = ESTADOS[p.estado] ?? { emoji: '⚪', clase: '', label: p.estado || '?' };
+  const esHeartbeat = p.tipo === 'heartbeat';
+
+  // Metrica principal: latencia (pull) o "ultima corrida" (heartbeat).
+  let metrica;
+  if (esHeartbeat) {
+    metrica = p.ultima_corrida ? `corrió ${hace(p.ultima_corrida)}` : 'sin reportes';
+  } else {
+    metrica = p.estado === 'CAIDO' || p.latencia_ms == null ? '— ms' : `${p.latencia_ms} ms`;
+  }
+
+  const uptime = p.uptime != null ? `<span class="uptime">uptime ${p.uptime}% · ${ventanaDias}d</span>` : '';
+
+  // "desde" cuando el estado no es OK (caído/lento/… desde ...).
   let lineaDesde = '';
   if (p.estado !== 'OK' && p.desde) {
-    const verbo = esCaido ? 'caído' : p.estado === 'LENTO' ? 'lento' : 'despertando';
-    lineaDesde = `<div class="desde">${verbo} ${hace(p.desde)}</div>`;
+    lineaDesde = `<div class="desde">${VERBO[p.estado] ?? p.estado} ${hace(p.desde)}</div>`;
   }
 
   return `
@@ -53,12 +64,13 @@ function filaHTML(p) {
       <span class="semaforo" aria-hidden="true">${info.emoji}</span>
       <div class="info">
         <div class="nombre">${escapar(p.nombre)}</div>
-        <div class="plataforma">${escapar(p.plataforma ?? '')}</div>
+        <div class="plataforma">${escapar(p.plataforma ?? '')}${esHeartbeat ? ' · heartbeat' : ''}</div>
         ${lineaDesde}
       </div>
       <div class="metricas">
         <span class="estado-label ${info.clase}">${info.label}</span>
-        <span class="latencia">${latencia}</span>
+        <span class="latencia">${metrica}</span>
+        ${uptime}
       </div>
     </div>`;
 }
@@ -73,7 +85,8 @@ function resumen(proyectos) {
   const n = (e) => proyectos.filter((p) => p.estado === e).length;
   const caidos = n('CAIDO');
   if (caidos > 0) return `🔴 ${caidos} caído/s`;
-  if (n('LENTO') + n('DESPERTANDO') > 0) return `🟡 ${n('LENTO') + n('DESPERTANDO')} con avisos`;
+  const avisos = n('LENTO') + n('DESPERTANDO') + n('SIN_DATOS');
+  if (avisos > 0) return `🟡 ${avisos} con avisos`;
   if (proyectos.length > 0) return '🟢 Todo OK';
   return '';
 }
@@ -89,7 +102,8 @@ function render(data) {
     panel.innerHTML = '<div class="vacio">No hay proyectos monitoreados todavía. Completá <code>proyectos.json</code>.</div>';
     return;
   }
-  panel.innerHTML = proyectos.map(filaHTML).join('');
+  const ventanaDias = data.uptime_ventana_dias ?? 30;
+  panel.innerHTML = proyectos.map((p) => filaHTML(p, ventanaDias)).join('');
 }
 
 async function cargar() {

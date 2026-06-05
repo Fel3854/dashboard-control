@@ -163,7 +163,48 @@ persiste. Variables útiles:
 | `ALERTA_COOLDOWN_HORAS` | `6` | Horas entre recordatorios de un mismo proyecto caído. |
 | `PANEL_URL` | (la de Pages) | Link al panel que se incluye en el mail. |
 
-## Fase 3 — Heartbeat (pendiente)
+## Fase 3 — Heartbeat + historial + uptime
 
-Los targets `tipo: "heartbeat"` (ej. Rotación) hoy se omiten; se sumarán acá junto con el
-historial (`history.json`) y el % de uptime.
+### Heartbeat (procesos que no se pingean)
+
+Para batch/local como **Rotación** (Streamlit) que no expone una URL, el modelo es *push*:
+el proceso reporta su última corrida y el checker vigila el silencio.
+
+- Config en `proyectos.json`: `{ "nombre": "Rotación", "tipo": "heartbeat",
+  "max_silencio_horas": 26, "plataforma": "local" }`.
+- El proceso, al terminar, escribe `heartbeats/<slug>.json` (`slug` de "Rotación" =
+  `rotacion`) con `{ "ultima_corrida": "<ISO>", "ok": true }`.
+- El checker (`checker/heartbeat.js`) lo lee y decide: **OK** si reportó hace ≤
+  `max_silencio_horas` · **CAÍDO** si superó ese silencio o la corrida reportó `ok:false`
+  · **SIN DATOS** (⚪) si todavía no hay ningún reporte.
+
+**Cómo reporta Rotación** — script [`heartbeat/ping.py`](heartbeat/ping.py) (solo
+stdlib, sin instalar nada), que actualiza el archivo vía la GitHub API sin clonar el repo:
+
+```bash
+GH_TOKEN=<token> python3 heartbeat/ping.py --slug rotacion --ok     # corrida OK
+GH_TOKEN=<token> python3 heartbeat/ping.py --slug rotacion --fail   # corrida con error
+```
+
+Desde tu proceso Python, al final de la corrida:
+
+```python
+import os, subprocess
+subprocess.run(["python3", "heartbeat/ping.py", "--slug", "rotacion", "--ok"],
+               env={**os.environ, "GH_TOKEN": MI_TOKEN})
+```
+
+> 🔑 `GH_TOKEN` = un **Personal Access Token fine-grained** con permiso *Contents: Read
+> and write* **solo** sobre este repo. Vive en la máquina de Rotación (en su `.env`), nunca
+> se commitea. El repo/branch se pueden cambiar con `--repo`/`--branch` o las env
+> `HEARTBEAT_REPO`/`HEARTBEAT_BRANCH`.
+
+### Historial y % de uptime
+
+- `history.json` (commiteado) guarda un *append* de las **transiciones** de estado — es
+  compacto y permite reconstruir cuánto tiempo estuvo cada proyecto online.
+- El checker calcula el **% de uptime** de cada proyecto sobre una ventana móvil de **30
+  días** (`checker/historial.js`) y lo incluye en `status.json`; el panel lo muestra por
+  fila. `OK`/`LENTO`/`DESPERTANDO` cuentan como "online"; `CAÍDO`/`SIN DATOS` como caído.
+- El historial se poda a 90 días (conservando un ancla por proyecto para no perder el
+  punto de partida del cálculo).

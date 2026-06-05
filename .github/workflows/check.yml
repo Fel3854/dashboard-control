@@ -54,16 +54,18 @@ jobs:
         id: checker
         run: node checker/check.js
 
-      # Persiste status.json (para "desde") y alertas-estado.json (para el cooldown).
+      # Persiste status.json ("desde"), alertas-estado.json (cooldown) e history.json (uptime).
       - name: Commitear estado
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/status.json alertas-estado.json
+          git add public/status.json alertas-estado.json history.json
           if git diff --staged --quiet; then
             echo "Sin cambios en el estado"
           else
             git commit -m "chore: update status.json [skip ci]"
+            # Rebase por si el ping de un heartbeat (u otra corrida) pusheo en el medio.
+            git pull --rebase origin main
             git push
           fi
 

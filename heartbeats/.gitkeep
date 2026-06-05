@@ -1,0 +1,3 @@
+# Acá viven los heartbeats reportados por procesos batch/locales (ej. rotacion.json).
+# Cada archivo: { "ultima_corrida": "<ISO 8601>", "ok": true }
+# Lo escribe el proceso (ver heartbeat/ping.py); el checker lo lee.

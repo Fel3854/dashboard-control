@@ -105,6 +105,9 @@ body {
 .fila.caido {
   border-left-color: var(--rojo);
 }
+.fila.sindatos {
+  border-left-color: var(--suave);
+}
 
 .semaforo {
   font-size: 1.4rem;
@@ -152,11 +155,21 @@ body {
 .estado-label.caido {
   background: var(--rojo);
 }
+.estado-label.sindatos {
+  background: var(--suave);
+}
 
 .metricas .latencia {
   display: block;
   margin-top: 4px;
   color: var(--suave);
+}
+
+.metricas .uptime {
+  display: block;
+  margin-top: 2px;
+  color: var(--suave);
+  font-size: 0.72rem;
 }
 
 /* ── Estados especiales ── */

@@ -11,6 +11,11 @@ import { readFile, writeFile, access } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { chequearHeartbeat } from './heartbeat.js';
+import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
+
+const UPTIME_VENTANA_DIAS = 30;
+
 // ── Constantes de la logica de chequeo ───────────────────────────────────────
 export const TIMEOUT_MS = 10_000; // corte por request
 export const LENTO_MS = 3_000; // umbral OK vs LENTO
@@ -157,45 +162,76 @@ async function existe(ruta) {
 export async function main() {
   const configPath = resolve(RAIZ, process.env.PROYECTOS_FILE || process.argv[2] || 'proyectos.json');
   const statusPath = resolve(RAIZ, process.env.STATUS_FILE || 'public/status.json');
+  const historyPath = resolve(RAIZ, process.env.HISTORY_FILE || 'history.json');
 
   const targets = await leerJSON(configPath);
   const anterior = (await existe(statusPath)) ? await leerJSON(statusPath) : null;
+  const history = (await existe(historyPath)) ? await leerJSON(historyPath) : { eventos: [] };
 
-  const ahoraISO = new Date().toISOString();
+  const ahora = Date.now();
+  const ahoraISO = new Date(ahora).toISOString();
 
-  // Fase 1: solo targets "pull" con URL configurada. Heartbeat y placeholders se saltean.
-  const aChequear = [];
-  for (const t of targets) {
-    if (t.tipo !== 'pull') {
-      console.warn(`↷ Omitido (tipo "${t.tipo}", se monitorea en Fase 3): ${t.nombre}`);
-      continue;
-    }
-    if (!urlConfigurada(t.url)) {
-      console.warn(`↷ Omitido (URL sin configurar): ${t.nombre} -> ${t.url}`);
-      continue;
-    }
-    aChequear.push(t);
-  }
-
+  // Targets "pull" (se pinguean) y "heartbeat" (reportan su ultima corrida). Los pull
+  // sin URL configurada (placeholders) se saltean.
   const proyectos = [];
-  for (const t of aChequear) {
-    const r = await chequearTarget(t);
+  for (const t of targets) {
+    let r;
+    if (t.tipo === 'heartbeat') {
+      r = await chequearHeartbeat(t, { ahora });
+    } else if (t.tipo === 'pull') {
+      if (!urlConfigurada(t.url)) {
+        console.warn(`↷ Omitido (URL sin configurar): ${t.nombre} -> ${t.url}`);
+        continue;
+      }
+      r = await chequearTarget(t);
+    } else {
+      console.warn(`↷ Omitido (tipo desconocido "${t.tipo}"): ${t.nombre}`);
+      continue;
+    }
+
     const desde = resolverDesde(t.nombre, r.estado, anterior, ahoraISO);
-    proyectos.push({
+    const proyecto = {
       nombre: t.nombre,
+      tipo: t.tipo,
       estado: r.estado,
-      latencia_ms: r.latencia_ms,
-      http_code: r.http_code,
+      latencia_ms: r.latencia_ms ?? null,
+      http_code: r.http_code ?? null,
       plataforma: t.plataforma ?? null,
       desde,
-    });
-    console.log(`• ${t.nombre.padEnd(32)} ${r.estado.padEnd(11)} ${r.latencia_ms}ms  http=${r.http_code ?? '-'}`);
+    };
+    if (t.tipo === 'heartbeat') proyecto.ultima_corrida = r.ultima_corrida ?? null;
+    proyectos.push(proyecto);
+
+    const metrica =
+      t.tipo === 'heartbeat'
+        ? `corrida=${r.ultima_corrida ?? '-'}`
+        : `${r.latencia_ms}ms  http=${r.http_code ?? '-'}`;
+    console.log(`• ${t.nombre.padEnd(32)} ${r.estado.padEnd(11)} ${metrica}`);
   }
 
-  const nuevo = { timestamp: ahoraISO, proyectos };
+  // ── Historial: registrar transiciones (+ sembrar proyectos sin historia) ─────
+  const transiciones = detectarTransiciones({ proyectos }, anterior, ahoraISO);
+  const conHistoria = new Set(history.eventos.map((e) => e.nombre));
+  for (const p of proyectos) {
+    if (!conHistoria.has(p.nombre) && !transiciones.some((e) => e.nombre === p.nombre)) {
+      transiciones.push({ nombre: p.nombre, estado: p.estado, timestamp: p.desde || ahoraISO });
+    }
+  }
+  history.eventos = podarHistorial([...history.eventos, ...transiciones], { ahora });
+
+  // ── Uptime por proyecto (ventana movil) ─────────────────────────────────────
+  for (const p of proyectos) {
+    const eventosP = history.eventos.filter((e) => e.nombre === p.nombre);
+    p.uptime = calcularUptime(eventosP, { ahora, ventanaDias: UPTIME_VENTANA_DIAS });
+  }
+
+  const nuevo = { timestamp: ahoraISO, uptime_ventana_dias: UPTIME_VENTANA_DIAS, proyectos };
 
   await writeFile(statusPath, JSON.stringify(nuevo, null, 2) + '\n', 'utf8');
-  console.log(`\n✓ status.json escrito (${proyectos.length} proyecto/s) -> ${statusPath}`);
+  await writeFile(historyPath, JSON.stringify(history, null, 2) + '\n', 'utf8');
+  console.log(
+    `\n✓ status.json (${proyectos.length} proyecto/s) y history.json (${history.eventos.length} evento/s) escritos.`,
+  );
 
   // ── Hook Fase 2 (alertas por email) ─────────────────────────────────────────
   // notify.js todavia NO existe en Fase 1. Cuando se cree (exportando `notify`),
