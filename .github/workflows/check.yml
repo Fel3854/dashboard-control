@@ -3,6 +3,17 @@ name: Check & Deploy
 # Corre el checker cada 10 min, commitea status.json y publica el panel en GitHub Pages.
 # Pre-requisito: Settings -> Pages -> Source = "GitHub Actions" (una sola vez).
 on:
+  # Redeploy inmediato al cambiar la config, el checker o el frontend (no espera al cron).
+  # NO incluye public/status.json (lo escribe el bot, ademas commitea con [skip ci]).
+  push:
+    branches: [main]
+    paths:
+      - 'proyectos.json'
+      - 'checker/**'
+      - 'public/index.html'
+      - 'public/app.js'
+      - 'public/styles.css'
+      - '.github/workflows/check.yml'
   schedule:
     - cron: '*/10 * * * *' # cada 10 min (el minimo real de Actions es ~5 min; puede demorarse)
   workflow_dispatch: {} # permite correr manual ("Check now")
