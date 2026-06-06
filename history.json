@@ -59,6 +59,11 @@
       "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-06-06T11:56:38.725Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "CAIDO",
+      "timestamp": "2026-06-06T16:40:29.803Z"
     }
   ]
 }
