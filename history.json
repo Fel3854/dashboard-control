@@ -69,6 +69,11 @@
       "nombre": "Consultas BD Mantenimiento",
       "estado": "DESPERTANDO",
       "timestamp": "2026-06-07T10:35:32.276Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-06-07T12:11:19.648Z"
     }
   ]
 }
