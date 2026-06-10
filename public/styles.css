@@ -64,7 +64,7 @@ body {
 .meta-check {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
@@ -72,41 +72,83 @@ body {
   color: var(--suave);
 }
 
+.meta-derecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .resumen {
   font-weight: bold;
 }
 
-/* ── Panel / filas ── */
+/* Boton "Forzar chequeo" (abre Actions). */
+.btn-check {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  background: var(--blanco);
+  color: var(--texto);
+  font-size: 0.78rem;
+  font-weight: bold;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-check:hover {
+  border-color: var(--primario);
+  color: var(--primario);
+}
+
+/* ── Panel / items ── */
 .panel {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.fila {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
+/* La tarjeta. El color de estado va en el borde izquierdo. */
+.item {
   background: var(--blanco);
   border: 1px solid var(--borde);
   border-left: 5px solid var(--borde);
   border-radius: var(--radius);
-  padding: 12px 16px;
+  overflow: hidden;
 }
 
-.fila.ok {
+.item.ok {
   border-left-color: var(--verde);
 }
-.fila.lento,
-.fila.despertando {
+.item.lento,
+.item.despertando {
   border-left-color: var(--amarillo);
 }
-.fila.caido {
+.item.caido {
   border-left-color: var(--rojo);
 }
-.fila.sindatos {
+.item.inactivo,
+.item.sindatos {
   border-left-color: var(--suave);
+}
+
+/* Header clickable (boton): mismo layout de 3 columnas + chevron. */
+.fila {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.fila:hover {
+  background: rgba(0, 0, 0, 0.025);
 }
 
 .semaforo {
@@ -123,10 +165,14 @@ body {
   color: var(--suave);
 }
 
+/* "desde": neutro por defecto, rojo solo si esta caído. */
 .info .desde {
   font-size: 0.8rem;
-  color: var(--alerta);
+  color: var(--suave);
   margin-top: 2px;
+}
+.info .desde.caido {
+  color: var(--alerta);
 }
 
 .metricas {
@@ -155,6 +201,7 @@ body {
 .estado-label.caido {
   background: var(--rojo);
 }
+.estado-label.inactivo,
 .estado-label.sindatos {
   background: var(--suave);
 }
@@ -170,6 +217,94 @@ body {
   margin-top: 2px;
   color: var(--suave);
   font-size: 0.72rem;
+}
+
+.chevron {
+  color: var(--suave);
+  font-size: 0.85rem;
+}
+
+/* ── Detalle expandible ── */
+.detalle {
+  display: none;
+  padding: 12px 16px 14px;
+  border-top: 1px dashed var(--borde);
+  background: #fafafa;
+  font-size: 0.85rem;
+}
+.item.abierto .detalle {
+  display: block;
+}
+
+.detalle-uptimes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.detalle-uptimes .up-label {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--suave);
+}
+.detalle-uptimes .up-item b {
+  font-size: 0.95rem;
+}
+
+.detalle-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 4px 16px;
+  margin-bottom: 10px;
+}
+.detalle-datos .dato {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px dotted var(--borde);
+  padding: 3px 0;
+}
+.detalle-datos .k {
+  color: var(--suave);
+}
+.detalle-datos .v {
+  font-weight: bold;
+  text-align: right;
+}
+
+.detalle-titulo {
+  font-weight: bold;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--suave);
+  margin-bottom: 6px;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.timeline li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.timeline .tl-estado {
+  font-weight: bold;
+}
+.timeline .tl-fecha {
+  text-align: right;
+  color: var(--suave);
+  font-size: 0.78rem;
+}
+.vacio-mini {
+  color: var(--suave);
 }
 
 /* ── Estados especiales ── */

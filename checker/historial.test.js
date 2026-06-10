@@ -52,6 +52,14 @@ test('calcularUptime: LENTO y DESPERTANDO cuentan como up', () => {
   assert.equal(calcularUptime(eventos, { ahora: T0, ventanaDias: 30 }), 100);
 });
 
+test('calcularUptime: INACTIVO (heartbeat ocioso) cuenta como up, no penaliza', () => {
+  const eventos = [
+    { estado: 'OK', timestamp: haceDias(40) },
+    { estado: 'INACTIVO', timestamp: haceDias(15) }, // dejo de correr, pero no es caida
+  ];
+  assert.equal(calcularUptime(eventos, { ahora: T0, ventanaDias: 30 }), 100);
+});
+
 test('calcularUptime: solo datos parciales dentro de la ventana', () => {
   // Primer dato hace 10 dias (no hay ancla previa): observa 10d, todo OK -> 100%
   const eventos = [{ estado: 'OK', timestamp: haceDias(10) }];

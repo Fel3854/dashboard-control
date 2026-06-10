@@ -24,7 +24,18 @@
     <main class="contenedor">
       <div class="meta-check">
         <span id="ultimo-check">Cargando…</span>
-        <span id="resumen" class="resumen"></span>
+        <span class="meta-derecha">
+          <a
+            id="check-now"
+            class="btn-check"
+            href="#"
+            target="_blank"
+            rel="noopener"
+            title="Abre GitHub Actions para correr el chequeo ahora (botón “Run workflow”)"
+            >↻ Forzar chequeo</a
+          >
+          <span id="resumen" class="resumen"></span>
+        </span>
       </div>
 
       <div id="panel" class="panel" role="list" aria-live="polite">
@@ -35,7 +46,7 @@
     </main>
 
     <footer class="pie">
-      <span>Se actualiza solo cada 60 s · pull + heartbeat · uptime 30 d</span>
+      <span>Se actualiza solo cada 60 s · pull + heartbeat · uptime 30 d · tocá un proyecto para ver el detalle</span>
     </footer>
 
     <script src="app.js"></script>

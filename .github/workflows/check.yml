@@ -32,10 +32,12 @@ concurrency:
 jobs:
   check-and-deploy:
     runs-on: ubuntu-latest
-    # MAIL_SERVER se expone como env para condicionar el step de email: si el secret no
-    # esta configurado, env queda vacio y el envio se saltea (no rompe el run).
+    # MAIL_SERVER / TELEGRAM_BOT_TOKEN se exponen como env para condicionar los steps de
+    # alerta: si el secret no esta configurado, env queda vacio y el envio se saltea (no
+    # rompe el run). Asi ambos canales (email y Telegram) son opcionales e independientes.
     env:
       MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -59,7 +61,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/status.json alertas-estado.json history.json
+          git add public/status.json public/history.json alertas-estado.json history.json
           if git diff --staged --quiet; then
             echo "Sin cambios en el estado"
           else
@@ -95,3 +97,19 @@ jobs:
           to: ${{ secrets.MAIL_TO }}
           from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
           body: file://alerta-cuerpo.txt
+
+      # Alerta por Telegram (opcional): reusa el mismo cuerpo que arma notify.js. Se activa
+      # solo si TELEGRAM_BOT_TOKEN esta configurado. Crear el bot con @BotFather y obtener el
+      # chat_id (ver README). No usa Action externa: un curl a la Bot API alcanza.
+      - name: Enviar alerta por Telegram
+        if: steps.checker.outputs.alerta == 'true' && env.TELEGRAM_BOT_TOKEN != ''
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ASUNTO: ${{ steps.checker.outputs.asunto }}
+        run: |
+          { printf '%s\n\n' "$ASUNTO"; cat alerta-cuerpo.txt; } > telegram-msg.txt
+          curl -sS --fail \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text@telegram-msg.txt" \
+            --data "disable_web_page_preview=true"

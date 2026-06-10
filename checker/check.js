@@ -14,7 +14,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chequearHeartbeat } from './heartbeat.js';
 import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
 
-const UPTIME_VENTANA_DIAS = 30;
+const UPTIME_VENTANA_DIAS = 30; // ventana principal que muestra la fila
+const UPTIME_VENTANAS = [7, 30, 90]; // ventanas extra para el detalle por proyecto
 
 // ── Constantes de la logica de chequeo ───────────────────────────────────────
 export const TIMEOUT_MS = 10_000; // corte por request
@@ -219,16 +220,24 @@ export async function main() {
   }
   history.eventos = podarHistorial([...history.eventos, ...transiciones], { ahora });
 
-  // ── Uptime por proyecto (ventana movil) ─────────────────────────────────────
+  // ── Uptime por proyecto (varias ventanas moviles) ───────────────────────────
+  // uptime = ventana principal (fila); uptimes = {7,30,90} para el detalle al click.
   for (const p of proyectos) {
     const eventosP = history.eventos.filter((e) => e.nombre === p.nombre);
-    p.uptime = calcularUptime(eventosP, { ahora, ventanaDias: UPTIME_VENTANA_DIAS });
+    p.uptimes = {};
+    for (const dias of UPTIME_VENTANAS) {
+      p.uptimes[dias] = calcularUptime(eventosP, { ahora, ventanaDias: dias });
+    }
+    p.uptime = p.uptimes[UPTIME_VENTANA_DIAS];
   }
 
   const nuevo = { timestamp: ahoraISO, uptime_ventana_dias: UPTIME_VENTANA_DIAS, proyectos };
 
   await writeFile(statusPath, JSON.stringify(nuevo, null, 2) + '\n', 'utf8');
   await writeFile(historyPath, JSON.stringify(history, null, 2) + '\n', 'utf8');
+  // Copia del historial junto al status (public/) para que el panel (Pages) lo sirva y
+  // dibuje el detalle por proyecto. history.json en la raiz sigue siendo la fuente.
+  await writeFile(resolve(dirname(statusPath), 'history.json'), JSON.stringify(history, null, 2) + '\n', 'utf8');
   console.log(
     `\n✓ status.json (${proyectos.length} proyecto/s) y history.json (${history.eventos.length} evento/s) escritos.`,
   );

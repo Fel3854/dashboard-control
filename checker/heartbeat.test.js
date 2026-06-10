@@ -20,9 +20,15 @@ test('evaluarHeartbeat: reporte reciente -> OK', () => {
   assert.equal(r.estado, 'OK');
 });
 
-test('evaluarHeartbeat: silencio mayor al permitido -> CAIDO', () => {
+test('evaluarHeartbeat: silencio mayor al permitido -> INACTIVO (no CAIDO)', () => {
+  // Un batch de cadencia irregular que hace rato no corre NO es una caida: es INACTIVO.
   const r = evaluarHeartbeat({ ultima_corrida: haceHoras(30) }, { ahora: T0, maxSilencioHoras: 26 });
-  assert.equal(r.estado, 'CAIDO');
+  assert.equal(r.estado, 'INACTIVO');
+});
+
+test('evaluarHeartbeat: silencio largo con ultima corrida OK -> INACTIVO', () => {
+  const r = evaluarHeartbeat({ ultima_corrida: haceHoras(24 * 5), ok: true }, { ahora: T0, maxSilencioHoras: 26 });
+  assert.equal(r.estado, 'INACTIVO');
 });
 
 test('evaluarHeartbeat: justo en el limite (<=) sigue OK', () => {

@@ -6,8 +6,10 @@
 //
 // Todas las funciones son PURAS e importables (se testean sin I/O).
 
-// Estados que cuentan como "online" (el servicio respondio / el batch corrio).
-export const ESTADOS_UP = new Set(['OK', 'LENTO', 'DESPERTANDO']);
+// Estados que NO cuentan como caida para el uptime (el servicio respondio, o el batch
+// simplemente esta ocioso). INACTIVO = heartbeat en silencio: un batch de cadencia
+// irregular que no corrio hace rato no es downtime, asi que no penaliza el uptime.
+export const ESTADOS_UP = new Set(['OK', 'LENTO', 'DESPERTANDO', 'INACTIVO']);
 
 const DIA_MS = 24 * 3600_000;
 

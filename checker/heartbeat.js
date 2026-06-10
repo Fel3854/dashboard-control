@@ -29,9 +29,15 @@ export function slug(nombre) {
 /**
  * Decide el estado de un heartbeat a partir de la señal reportada. Pura.
  *
+ * Distingue una FALLA real (la corrida reporto error) de un simple SILENCIO (el batch
+ * hace rato que no corre): para procesos de cadencia irregular, no haber corrido NO es
+ * una caida, asi que el silencio se reporta como INACTIVO (neutro) y no como CAIDO.
+ *
  * Estados:
  *  - OK        : reporto hace <= max_silencio_horas y la corrida fue exitosa.
- *  - CAIDO     : silencio mayor al permitido, o la ultima corrida reporto `ok: false`.
+ *  - CAIDO     : la ultima corrida reporto `ok: false` (falla real del proceso).
+ *  - INACTIVO  : reporto alguna vez pero el silencio supera el permitido (no corrio
+ *                hace rato). No es una caida: no alarma ni cuenta como down.
  *  - SIN_DATOS : nunca reporto (no hay señal todavia).
  *
  * @param {{ultima_corrida?:string, ok?:boolean}|null} senal
@@ -47,8 +53,8 @@ export function evaluarHeartbeat(senal, { ahora = Date.now(), maxSilencioHoras =
   }
   const antiguedad_ms = ahora - ts;
   let estado;
-  if (senal.ok === false) estado = 'CAIDO';
-  else if (antiguedad_ms > maxSilencioHoras * 3600_000) estado = 'CAIDO';
+  if (senal.ok === false) estado = 'CAIDO'; // falla real reportada por la corrida
+  else if (antiguedad_ms > maxSilencioHoras * 3600_000) estado = 'INACTIVO'; // solo silencio, no es caida
   else estado = 'OK';
   return { estado, ultima_corrida: senal.ultima_corrida, antiguedad_ms };
 }

@@ -5,9 +5,10 @@ sanos**. Un checker pinguea cada servicio cada 10 min (vía GitHub Actions), cal
 estado + latencia y escribe `public/status.json`; el panel estático (GitHub Pages) lo
 muestra con semáforos 🟢🟡🔴.
 
-> Fuente de verdad del diseño: [`DESIGN.md`](DESIGN.md). Incluye **Fase 1** (checker +
-> estado + panel) y **Fase 2** (alertas por email). Falta la **Fase 3** (heartbeat +
-> historial), pero el código ya está preparado para enchufarla.
+> Fuente de verdad del diseño: [`DESIGN.md`](DESIGN.md). **Fase 1** (checker + estado +
+> panel), **Fase 2** (alertas por email) y **Fase 3** (heartbeat + historial + uptime) ya
+> están en producción. Sumado: detalle por proyecto, botón de chequeo manual y alertas por
+> Telegram (ver más abajo).
 
 ## Requisitos
 
@@ -78,7 +79,8 @@ tenga `COMPLETAR`, el checker la **omite** (no la marca en rojo). Campos por tar
 | Campo | Obligatorio | Notas |
 |---|---|---|
 | `nombre` | sí | Se muestra en el panel. |
-| `tipo` | sí | `pull` (se chequea en Fase 1) o `heartbeat` (Fase 3, se omite por ahora). |
+| `tipo` | sí | `pull` (se pinguea) o `heartbeat` (proceso *push*, ver Fase 3). |
+| `max_silencio_horas` | si es `heartbeat` | Silencio tolerado antes de marcar `INACTIVO` (default 26). |
 | `url` | si es `pull` | El endpoint a pinguear (idealmente un `GET /health`). |
 | `plataforma` | sí | Etiqueta visible (Render, Vercel, etc.). |
 | `tolera_cold_start` | no | `true` para Render/Cloud Run: habilita el estado `DESPERTANDO`. |
@@ -174,9 +176,17 @@ el proceso reporta su última corrida y el checker vigila el silencio.
   "max_silencio_horas": 26, "plataforma": "local" }`.
 - El proceso, al terminar, escribe `heartbeats/<slug>.json` (`slug` de "Rotación" =
   `rotacion`) con `{ "ultima_corrida": "<ISO>", "ok": true }`.
-- El checker (`checker/heartbeat.js`) lo lee y decide: **OK** si reportó hace ≤
-  `max_silencio_horas` · **CAÍDO** si superó ese silencio o la corrida reportó `ok:false`
-  · **SIN DATOS** (⚪) si todavía no hay ningún reporte.
+- El checker (`checker/heartbeat.js`) lo lee y decide:
+  - **OK** 🟢 — reportó hace ≤ `max_silencio_horas` y la corrida fue exitosa.
+  - **CAÍDO** 🔴 — la última corrida reportó `ok:false` (**falla real** del proceso).
+  - **INACTIVO** ⚪ — reportó alguna vez pero superó el silencio permitido. Es un batch de
+    cadencia irregular que **no corrió hace rato**: NO es una caída, así que **no alarma**
+    (no manda email/Telegram), no cuenta como "caído" en el resumen y **no penaliza el
+    uptime**. Solo informa.
+  - **SIN DATOS** ⚪ — todavía no hay ningún reporte.
+
+  > El silencio de un heartbeat **ya no se marca como CAÍDO** (eso daba falsas alarmas con
+  > procesos que no corren todos los días): el rojo se reserva para `ok:false`.
 
 **Cómo reporta Rotación** — script [`heartbeat/ping.py`](heartbeat/ping.py) (solo
 stdlib, sin instalar nada), que actualiza el archivo vía la GitHub API sin clonar el repo:
@@ -203,8 +213,44 @@ subprocess.run(["python3", "heartbeat/ping.py", "--slug", "rotacion", "--ok"],
 
 - `history.json` (commiteado) guarda un *append* de las **transiciones** de estado — es
   compacto y permite reconstruir cuánto tiempo estuvo cada proyecto online.
-- El checker calcula el **% de uptime** de cada proyecto sobre una ventana móvil de **30
-  días** (`checker/historial.js`) y lo incluye en `status.json`; el panel lo muestra por
-  fila. `OK`/`LENTO`/`DESPERTANDO` cuentan como "online"; `CAÍDO`/`SIN DATOS` como caído.
+- El checker calcula el **% de uptime** de cada proyecto sobre ventanas móviles de **7 / 30
+  / 90 días** (`checker/historial.js`) y los incluye en `status.json` (`uptime` = 30 d para
+  la fila, `uptimes` para el detalle). `OK`/`LENTO`/`DESPERTANDO`/`INACTIVO` cuentan como
+  "online"; solo `CAÍDO`/`SIN DATOS` penalizan.
 - El historial se poda a 90 días (conservando un ancla por proyecto para no perder el
-  punto de partida del cálculo).
+  punto de partida del cálculo). Se publica una copia en `public/history.json` para que el
+  panel dibuje el detalle por proyecto.
+
+## Mejoras del panel
+
+- **Detalle por proyecto** — tocá cualquier fila y se expande mostrando uptime 7/30/90 d,
+  los datos actuales (latencia/HTTP o última corrida, plataforma, "desde") y los **últimos
+  cambios de estado** (de `public/history.json`). Se vuelve a tocar para cerrar.
+- **Forzar chequeo** — el botón "↻ Forzar chequeo" abre la pestaña de GitHub Actions del
+  workflow para correrlo on-demand (botón *Run workflow*) sin esperar al cron. Un panel
+  estático **público** no puede guardar un token de escritura, así que el disparo es
+  manual desde Actions (seguro y sin secretos en el front).
+
+## Alertas por Telegram (opcional)
+
+Además del email, el workflow puede avisar las mismas transiciones a un chat de Telegram.
+Reusa el cuerpo que arma `notify.js`; un `curl` a la Bot API alcanza (sin Action externa).
+Se activa **solo** si está el secret `TELEGRAM_BOT_TOKEN` (si no, se saltea, igual que el
+email).
+
+### Activar (una vez)
+
+1. **Crear el bot:** escribile a [`@BotFather`](https://t.me/BotFather) → `/newbot` →
+   te da el **token** (`123456:ABC-...`).
+2. **Obtener el `chat_id`:** mandale un mensaje a tu bot (o agregalo al grupo) y abrí
+   `https://api.telegram.org/bot<TOKEN>/getUpdates` — el `chat_id` aparece en
+   `result[].message.chat.id` (para grupos es negativo).
+3. **GitHub Secrets** (Settings → Secrets and variables → Actions):
+
+   | Secret | Ejemplo | Notas |
+   |---|---|---|
+   | `TELEGRAM_BOT_TOKEN` | `123456:ABC-DEF…` | Token de @BotFather. Sin esto el envío se saltea. |
+   | `TELEGRAM_CHAT_ID` | `12345678` o `-1001234…` | Chat/grupo donde avisar. |
+
+Listo: ante la próxima caída/recuperación, llega el mensaje a Telegram (y el email, si está
+configurado — son independientes).
