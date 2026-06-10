@@ -1,57 +1,82 @@
 {
-  "timestamp": "2026-06-10T16:05:34.174Z",
+  "timestamp": "2026-06-10T17:44:26.451Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1288,
+      "latencia_ms": 1449,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-05T01:40:43.709Z",
+      "uptimes": {
+        "7": 100,
+        "30": 100,
+        "90": 100
+      },
       "uptime": 100
     },
     {
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 123,
+      "latencia_ms": 120,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
+      "uptimes": {
+        "7": 100,
+        "30": 100,
+        "90": 100
+      },
       "uptime": 100
     },
     {
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 129,
+      "latencia_ms": 97,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
+      "uptimes": {
+        "7": 100,
+        "30": 100,
+        "90": 100
+      },
       "uptime": 100
     },
     {
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1432,
+      "latencia_ms": 1081,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
+      "uptimes": {
+        "7": 100,
+        "30": 100,
+        "90": 100
+      },
       "uptime": 100
     },
     {
       "nombre": "Rotacion",
       "tipo": "heartbeat",
-      "estado": "CAIDO",
+      "estado": "INACTIVO",
       "latencia_ms": null,
       "http_code": null,
       "plataforma": "local",
-      "desde": "2026-06-06T16:40:29.803Z",
+      "desde": "2026-06-10T17:44:26.451Z",
       "ultima_corrida": "2026-06-05T13:34:35Z",
-      "uptime": 19.6
+      "uptimes": {
+        "7": 19.4,
+        "30": 19.4,
+        "90": 19.4
+      },
+      "uptime": 19.4
     }
   ]
 }
