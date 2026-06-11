@@ -254,3 +254,22 @@ email).
 
 Listo: ante la próxima caída/recuperación, llega el mensaje a Telegram (y el email, si está
 configurado — son independientes).
+
+### Probar las alertas sin esperar una caída
+
+En **Actions → Check & Deploy → Run workflow**, marcá la casilla **`test_alerta`** y corré.
+Manda un mensaje de prueba (`🧪 Prueba de alertas`) por los canales configurados — sirve para
+verificar que email/Telegram funcionan. No persiste estado ni afecta el panel.
+
+### Si el email no llega (`BadCredentials`)
+
+Un fallo de envío **ya no rompe el deploy** (los steps de alerta tienen `continue-on-error`),
+así que revisá el log del step "Enviar alerta por email". El error típico de Gmail es:
+
+```
+535-5.7.8 Username and Password not accepted (BadCredentials)
+```
+
+Significa que el **App Password venció/se revocó**. Generá uno nuevo en
+https://myaccount.google.com/apppasswords (requiere 2FA) y actualizá el secret `MAIL_PASSWORD`.
+Después verificá con el `test_alerta` de arriba.

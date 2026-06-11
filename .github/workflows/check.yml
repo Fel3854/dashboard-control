@@ -16,7 +16,12 @@ on:
       - '.github/workflows/check.yml'
   schedule:
     - cron: '*/10 * * * *' # cada 10 min (el minimo real de Actions es ~5 min; puede demorarse)
-  workflow_dispatch: {} # permite correr manual ("Check now")
+  workflow_dispatch: # permite correr manual ("Check now")
+    inputs:
+      test_alerta:
+        description: 'Enviar una alerta de PRUEBA por email/Telegram (para verificar los canales)'
+        type: boolean
+        default: false
 
 # contents: write -> commitear status.json | pages+id-token: write -> deploy a Pages
 permissions:
@@ -54,6 +59,9 @@ jobs:
       # corre notify.js: si hubo transicion, deja los outputs `alerta`/`asunto`.
       - name: Correr checker
         id: checker
+        env:
+          # Si se corre a mano con el input "test_alerta", manda una alerta de prueba.
+          TEST_ALERTA: ${{ inputs.test_alerta && '1' || '' }}
         run: node checker/check.js
 
       # Persiste status.json ("desde"), alertas-estado.json (cooldown) e history.json (uptime).

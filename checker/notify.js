@@ -127,6 +127,29 @@ async function existe(ruta) {
  * @param {{ nuevo: object, anterior: object|null, dryRun?: boolean }} ctx
  */
 export async function notify({ nuevo, anterior, dryRun = false }) {
+  // ── Modo TEST: fuerza una alerta de prueba para verificar los canales ────────
+  // Se dispara con TEST_ALERTA=1 (lo setea el workflow al correrlo a mano con el input
+  // "test_alerta"). Manda email/Telegram sin esperar a una caida real, y NO persiste nada.
+  if (process.env.TEST_ALERTA === '1') {
+    const asunto = '[Master Bus] 🧪 Prueba de alertas';
+    const cuerpo = [
+      'Mensaje de PRUEBA del Dashboard de Control.',
+      'Si lo recibís, el canal de alertas está funcionando. ✅',
+      '',
+      `Panel: ${PANEL_URL}`,
+    ].join('\n');
+    const out = process.env.GITHUB_OUTPUT;
+    if (out) {
+      await writeFile(resolve(RAIZ, 'alerta-cuerpo.txt'), cuerpo, 'utf8');
+      await appendFile(out, `alerta=true\n`);
+      await appendFile(out, `asunto=${asunto}\n`);
+      console.log('notify: TEST_ALERTA activo → alerta de prueba marcada para email/Telegram.');
+    } else {
+      console.log(`notify (TEST_ALERTA, fuera de Actions):\n  ${asunto}\n${cuerpo}`);
+    }
+    return { eventos: [{ tipo: 'test' }], asunto, cuerpo, test: true };
+  }
+
   const cooldownMs = Number(process.env.ALERTA_COOLDOWN_HORAS ?? COOLDOWN_HORAS_DEFAULT) * 3600_000;
   const alertasPath = resolve(RAIZ, 'alertas-estado.json');
   const alertasEstado = (await existe(alertasPath)) ? JSON.parse(await readFile(alertasPath, 'utf8')) : {};
