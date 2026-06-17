@@ -2,7 +2,7 @@
   {
     "nombre": "Sistema Cubiertas",
     "tipo": "pull",
-    "url": "https://sist-cubiertas.vercel.app/",
+    "url": "https://sist-cubiertas.vercel.app/health",
     "plataforma": "Vercel",
     "salud_json": true
   },
