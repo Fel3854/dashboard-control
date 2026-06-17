@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-17T18:06:02.771Z",
+  "timestamp": "2026-06-17T20:29:16.029Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1166,
+      "latencia_ms": 1794,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -22,7 +22,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 187,
+      "latencia_ms": 332,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -30,7 +30,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 7307
+        "uptime_s": 15901
       },
       "uptimes": {
         "7": 100,
@@ -59,7 +59,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 3173,
+      "latencia_ms": 5729,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -77,7 +77,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1449,
+      "latencia_ms": 1340,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -92,7 +92,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1171,
+      "latencia_ms": 486,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -115,10 +115,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 64,
-        "90": 64
+        "30": 64.3,
+        "90": 64.3
       },
-      "uptime": 64
+      "uptime": 64.3
     }
   ]
 }
