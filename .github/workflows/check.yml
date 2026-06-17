@@ -75,9 +75,23 @@ jobs:
             echo "Sin cambios en el estado"
           else
             git commit -m "chore: update status.json [skip ci]"
-            # Rebase por si el ping de un heartbeat (u otra corrida) pusheo en el medio.
-            git pull --rebase origin main
-            git push
+            # status.json/history.json son GENERADOS: no se mergean a mano. Si otra corrida
+            # pusheo en el medio (origin se movio), rebaseamos prefiriendo NUESTRA version
+            # recien generada (-X theirs = el commit que se aplica) y reintentamos el push.
+            # Asi un choque entre corridas no rompe el deploy.
+            pushed=""
+            for intento in 1 2 3 4 5; do
+              git fetch -q origin main || continue
+              if ! git rebase -X theirs origin/main; then
+                git rebase --abort || true
+                continue
+              fi
+              if git push origin HEAD:main; then pushed=1; break; fi
+              sleep 2
+            done
+            if [ -z "$pushed" ]; then
+              echo "::warning::No se pudo pushear el estado tras varios reintentos (otra corrida lo hara)"
+            fi
           fi
 
       - name: Configurar Pages
