@@ -94,6 +94,16 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-06-17T21:23:26.166Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-06-17T21:57:46.505Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "OK",
+      "timestamp": "2026-06-17T21:57:46.505Z"
     }
   ]
 }
