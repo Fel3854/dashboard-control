@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - 'proyectos.json'
+      - 'heartbeats/**' # un heartbeat nuevo (ej. Rotacion) refresca el panel sin esperar al cron
       - 'checker/**'
       - 'public/index.html'
       - 'public/app.js'
