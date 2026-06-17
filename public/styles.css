@@ -283,6 +283,29 @@ body {
   margin-bottom: 6px;
 }
 
+/* Salud del servicio (internos del /health) */
+.detalle-salud {
+  margin-bottom: 10px;
+}
+.detalle-salud .salud-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.detalle-salud .salud-item {
+  color: var(--suave);
+  font-size: 0.85rem;
+}
+.detalle-salud .salud-item b {
+  color: var(--texto);
+}
+.detalle-salud .salud-item b.salud-ok {
+  color: var(--verde);
+}
+.detalle-salud .salud-item b.salud-err {
+  color: var(--alerta);
+}
+
 .timeline {
   list-style: none;
   margin: 0;

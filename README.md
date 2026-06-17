@@ -85,6 +85,7 @@ tenga `COMPLETAR`, el checker la **omite** (no la marca en rojo). Campos por tar
 | `plataforma` | sí | Etiqueta visible (Render, Vercel, etc.). |
 | `tolera_cold_start` | no | `true` para Render/Cloud Run: habilita el estado `DESPERTANDO`. |
 | `es_dependencia` | no | Marca informativa (ej. ERP del que dependen otros). |
+| `salud_json` | no | `true` si la `url` es un `/health` que devuelve JSON: el checker lee sus internos (ver abajo). |
 
 > **Seguridad:** `status.json` **no** incluye las URLs — el panel nunca expone endpoints
 > internos. Nunca commitees credenciales (las de Fase 2 van en GitHub Secrets).
@@ -103,6 +104,22 @@ antes de declarar caído. La función que decide es pura (`decidirEstado`) y tes
 
 Cada proyecto lleva un `desde` (desde cuándo está en ese estado), calculado comparando con
 el `status.json` anterior.
+
+### Chequeo profundo (`salud_json`)
+
+El ping de arriba solo confirma que el server **contesta** (2xx + latencia): no dice si está
+sano por dentro (la home puede cargar aunque la base esté caída). Si un target expone un
+endpoint `/health` que devuelve JSON, marcalo con `"salud_json": true` y, además del ping, el
+checker hace **una** lectura del cuerpo ([`checker/salud.js`](checker/salud.js)) y guarda sus
+internos en `status.json` (`salud`), que el panel muestra en el detalle de la fila.
+
+- Convención del `/health`: `{ "status": "ok", "version": "1.0.0", "db": "ok", "uptime_s": 123 }`.
+- **Whitelist de seguridad:** solo se conservan las claves `status`, `version`, `db`,
+  `database`, `uptime_s`, `commit` (con valores escalares). Cualquier otro campo que el
+  `/health` incluyera por error (tokens, connection strings) se descarta — nunca llega al
+  panel. La función `extraerSalud` es pura y testeada (`checker/salud.test.js`).
+- Es best-effort: si el endpoint no responde JSON o falla el parseo, `salud` queda `null` y no
+  rompe el chequeo (el estado sigue saliendo del ping normal).
 
 ## Desplegar en GitHub Pages
 

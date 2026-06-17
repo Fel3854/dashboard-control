@@ -3,27 +3,45 @@
     "nombre": "Sistema Cubiertas",
     "tipo": "pull",
     "url": "https://sist-cubiertas.vercel.app/",
-    "plataforma": "Vercel"
+    "plataforma": "Vercel",
+    "salud_json": true
   },
   {
     "nombre": "Consultas BD Mantenimiento",
     "tipo": "pull",
     "url": "https://masterbus-dashboard.onrender.com/health",
     "plataforma": "Render",
-    "tolera_cold_start": true
+    "tolera_cold_start": true,
+    "salud_json": true
   },
   {
     "nombre": "Controles Stock Telegram",
     "tipo": "pull",
     "url": "https://cycle-count-bot-259211746597.us-central1.run.app",
     "plataforma": "Cloud Run",
-    "tolera_cold_start": true
+    "tolera_cold_start": true,
+    "salud_json": true
+  },
+  {
+    "nombre": "Fichadas Mantenimiento",
+    "tipo": "pull",
+    "url": "https://fel3854--fichadas-mant-fastapi-app.modal.run/health",
+    "plataforma": "Modal",
+    "tolera_cold_start": true,
+    "salud_json": true
+  },
+  {
+    "nombre": "Capacitaciones RRHH",
+    "tipo": "pull",
+    "url": "https://rhh-lilac.vercel.app/",
+    "plataforma": "Vercel"
   },
   {
     "nombre": "Sistema Compras",
     "tipo": "pull",
     "url": "https://COMPLETAR-compras.up.railway.app/health",
-    "plataforma": "Railway"
+    "plataforma": "Railway",
+    "salud_json": true
   },
   {
     "nombre": "ERP Masterbus",

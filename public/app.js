@@ -57,6 +57,43 @@ function fmtUptime(v) {
   return v == null ? '—' : `${v}%`;
 }
 
+/** Segundos -> "2 d 4 h" / "3 h 10 min" / "45 s". */
+function fmtUptimeSegundos(s) {
+  if (s == null || Number.isNaN(Number(s))) return '—';
+  s = Math.floor(Number(s));
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const min = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d} d ${h} h`;
+  if (h > 0) return `${h} h ${min} min`;
+  if (min > 0) return `${min} min`;
+  return `${s} s`;
+}
+
+/** Bloque "Salud del servicio": internos leídos del /health (version, base, uptime). */
+function saludHTML(p) {
+  const s = p.salud;
+  if (!s || typeof s !== 'object') return '';
+  const items = [];
+  if (s.version != null) items.push(`<span class="salud-item">versión <b>${escapar(String(s.version))}</b></span>`);
+  if (s.commit != null) items.push(`<span class="salud-item">commit <b>${escapar(String(s.commit))}</b></span>`);
+  if (s.db != null) {
+    const ok = s.db === 'ok' || s.db === true;
+    const txt = s.db === true ? 'conectada' : s.db === false ? 'error' : String(s.db);
+    items.push(`<span class="salud-item">base <b class="${ok ? 'salud-ok' : 'salud-err'}">${escapar(txt)}</b></span>`);
+  }
+  if (s.uptime_s != null) items.push(`<span class="salud-item">uptime <b>${escapar(fmtUptimeSegundos(s.uptime_s))}</b></span>`);
+  if (s.status != null && s.version == null && s.db == null) {
+    items.push(`<span class="salud-item">estado <b>${escapar(String(s.status))}</b></span>`);
+  }
+  if (items.length === 0) return '';
+  return `
+    <div class="detalle-salud">
+      <div class="detalle-titulo">Salud del servicio</div>
+      <div class="salud-items">${items.join('')}</div>
+    </div>`;
+}
+
 /** Detalle expandible de un proyecto: uptimes por ventana + ultimos cambios de estado. */
 function detalleHTML(p) {
   const u = p.uptimes ?? {};
@@ -68,6 +105,9 @@ function detalleHTML(p) {
   const datos = [];
   if (p.tipo === 'heartbeat') {
     datos.push(['Última corrida', p.ultima_corrida ? `${horaLocal(p.ultima_corrida)} (${hace(p.ultima_corrida)})` : 'sin reportes']);
+    if (p.max_silencio_horas != null) {
+      datos.push(['Cadencia esperada', `reporta cada ≤ ${p.max_silencio_horas} h · INACTIVO = no corrió hace rato (no es caída)`]);
+    }
   } else {
     datos.push(['Latencia', p.latencia_ms != null ? `${p.latencia_ms} ms` : '—']);
     datos.push(['HTTP', p.http_code != null ? p.http_code : '—']);
@@ -99,6 +139,7 @@ function detalleHTML(p) {
     <div class="detalle" id="detalle-${escapar(slugId(p.nombre))}">
       <div class="detalle-uptimes"><span class="up-label">uptime</span>${filasUp}</div>
       <div class="detalle-datos">${datosHTML}</div>
+      ${saludHTML(p)}
       <div class="detalle-historial">
         <div class="detalle-titulo">Últimos cambios de estado</div>
         ${timeline}

@@ -13,6 +13,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { chequearHeartbeat } from './heartbeat.js';
 import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
+import { obtenerSalud } from './salud.js';
 
 const UPTIME_VENTANA_DIAS = 30; // ventana principal que muestra la fila
 const UPTIME_VENTANAS = [7, 30, 90]; // ventanas extra para el detalle por proyecto
@@ -201,6 +202,13 @@ export async function main() {
       desde,
     };
     if (t.tipo === 'heartbeat') proyecto.ultima_corrida = r.ultima_corrida ?? null;
+    if (t.max_silencio_horas != null) proyecto.max_silencio_horas = t.max_silencio_horas;
+
+    // Chequeo profundo (opt-in): si el target expone un /health JSON y respondio, leer sus
+    // internos (version, base, uptime). Best-effort: si falla, `salud` queda null.
+    if (t.tipo === 'pull' && t.salud_json && ['OK', 'LENTO', 'DESPERTANDO'].includes(r.estado)) {
+      proyecto.salud = await obtenerSalud(t.url);
+    }
     proyectos.push(proyecto);
 
     const metrica =
