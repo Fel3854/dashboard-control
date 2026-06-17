@@ -79,6 +79,16 @@
       "nombre": "Rotacion",
       "estado": "INACTIVO",
       "timestamp": "2026-06-10T17:44:26.451Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-06-17T16:04:31.659Z"
+    },
+    {
+      "nombre": "Capacitaciones RRHH",
+      "estado": "OK",
+      "timestamp": "2026-06-17T16:04:31.659Z"
     }
   ]
 }
