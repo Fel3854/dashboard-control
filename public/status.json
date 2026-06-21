@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-21T01:42:37.498Z",
+  "timestamp": "2026-06-21T06:35:44.283Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1686,
+      "latencia_ms": 1826,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -27,7 +27,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 447,
+      "latencia_ms": 289,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -35,7 +35,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 188398
+        "uptime_s": 205985
       },
       "uptimes": {
         "7": 100,
@@ -48,7 +48,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 74,
+      "latencia_ms": 66,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -63,11 +63,11 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
-      "estado": "OK",
-      "latencia_ms": 2911,
+      "estado": "LENTO",
+      "latencia_ms": 3498,
       "http_code": 200,
       "plataforma": "Modal",
-      "desde": "2026-06-21T01:42:37.498Z",
+      "desde": "2026-06-21T06:35:44.283Z",
       "salud": {
         "status": "ok"
       },
@@ -82,7 +82,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1073,
+      "latencia_ms": 1076,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -97,7 +97,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 482,
+      "latencia_ms": 745,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -120,10 +120,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 71.5,
-        "90": 71.5
+        "30": 71.8,
+        "90": 71.8
       },
-      "uptime": 71.5
+      "uptime": 71.8
     }
   ]
 }
