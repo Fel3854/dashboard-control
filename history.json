@@ -134,6 +134,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "CAIDO",
       "timestamp": "2026-06-21T20:00:37.371Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-06-21T21:39:59.882Z"
     }
   ]
 }

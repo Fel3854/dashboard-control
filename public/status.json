@@ -1,27 +1,33 @@
 {
-  "timestamp": "2026-06-21T20:00:37.371Z",
+  "timestamp": "2026-06-21T21:39:59.882Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
-      "estado": "CAIDO",
-      "latencia_ms": 10000,
-      "http_code": null,
+      "estado": "OK",
+      "latencia_ms": 1534,
+      "http_code": 200,
       "plataforma": "Vercel",
-      "desde": "2026-06-21T20:00:37.371Z",
-      "uptimes": {
-        "7": 100,
-        "30": 100,
-        "90": 100
+      "desde": "2026-06-21T21:39:59.882Z",
+      "salud": {
+        "status": "ok",
+        "version": "1.0.0",
+        "db": "ok",
+        "uptime_s": 1
       },
-      "uptime": 100
+      "uptimes": {
+        "7": 99,
+        "30": 99.6,
+        "90": 99.6
+      },
+      "uptime": 99.6
     },
     {
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 407,
+      "latencia_ms": 221,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -29,7 +35,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 254313
+        "uptime_s": 260240
       },
       "uptimes": {
         "7": 100,
@@ -42,7 +48,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 95,
+      "latencia_ms": 71,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -58,7 +64,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 4305,
+      "latencia_ms": 5332,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-06-21T06:35:44.283Z",
@@ -76,7 +82,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1150,
+      "latencia_ms": 1139,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -91,7 +97,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1154,
+      "latencia_ms": 716,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -114,10 +120,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 72.8,
-        "90": 72.8
+        "30": 72.9,
+        "90": 72.9
       },
-      "uptime": 72.8
+      "uptime": 72.9
     }
   ]
 }
