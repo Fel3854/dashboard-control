@@ -1,21 +1,15 @@
 {
-  "timestamp": "2026-06-21T18:06:12.763Z",
+  "timestamp": "2026-06-21T20:00:37.371Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
-      "estado": "OK",
-      "latencia_ms": 1775,
-      "http_code": 200,
+      "estado": "CAIDO",
+      "latencia_ms": 10000,
+      "http_code": null,
       "plataforma": "Vercel",
-      "desde": "2026-06-05T01:40:43.709Z",
-      "salud": {
-        "status": "ok",
-        "version": "1.0.0",
-        "db": "ok",
-        "uptime_s": 1
-      },
+      "desde": "2026-06-21T20:00:37.371Z",
       "uptimes": {
         "7": 100,
         "30": 100,
@@ -27,7 +21,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 189,
+      "latencia_ms": 407,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -35,7 +29,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 247413
+        "uptime_s": 254313
       },
       "uptimes": {
         "7": 100,
@@ -48,7 +42,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 120,
+      "latencia_ms": 95,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -64,7 +58,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 4297,
+      "latencia_ms": 4305,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-06-21T06:35:44.283Z",
@@ -82,7 +76,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 884,
+      "latencia_ms": 1150,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -97,7 +91,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 904,
+      "latencia_ms": 1154,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -120,10 +114,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 72.6,
-        "90": 72.6
+        "30": 72.8,
+        "90": 72.8
       },
-      "uptime": 72.6
+      "uptime": 72.8
     }
   ]
 }
