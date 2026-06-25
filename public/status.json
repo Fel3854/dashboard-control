@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-25T12:03:21.826Z",
+  "timestamp": "2026-06-25T15:09:48.834Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1818,
+      "latencia_ms": 1981,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-21T21:39:59.882Z",
@@ -27,7 +27,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 354,
+      "latencia_ms": 229,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -35,7 +35,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 571242
+        "uptime_s": 582429
       },
       "uptimes": {
         "7": 100,
@@ -48,7 +48,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 117,
+      "latencia_ms": 107,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -64,7 +64,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 4345,
+      "latencia_ms": 4840,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-06-25T12:03:21.826Z",
@@ -82,7 +82,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1347,
+      "latencia_ms": 1131,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -97,7 +97,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 738,
+      "latencia_ms": 713,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -120,10 +120,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 77.7,
-        "90": 77.7
+        "30": 77.8,
+        "90": 77.8
       },
-      "uptime": 77.7
+      "uptime": 77.8
     }
   ]
 }
