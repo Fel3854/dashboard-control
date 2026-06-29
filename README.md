@@ -154,14 +154,25 @@ detalle al expandir. Si la función falla **aunque el ping esté en verde**, dis
 - **Secretos:** valores `env:NOMBRE` se leen del entorno (GitHub Secrets), **nunca** del repo.
   Cargá `CUBIERTAS_USER`/`CUBIERTAS_PASS` (un usuario de prueba de solo-lectura) en
   **Settings → Secrets and variables → Actions**. El workflow ya los pasa al checker.
-- **Cookie de sesión:** un paso con `guardar_cookie` lee el `Set-Cookie` (sin seguir el redirect)
-  y los pasos con `usar_cookie: true` la reenvían — así se prueba el camino autenticado.
-- **Aserciones (`espera`):** `status` (número o lista), `json_tiene` (claves presentes en un
-  objeto), `json_array_no_vacio` (el body es un array con ≥1 fila — confirma que la query trajo
-  datos), `texto_incluye` (substring, para respuestas HTML). Corta en el primer paso que falla.
-- **Sin login:** si la función es pública (ej. una consulta GET), omití `requiere_secrets`,
-  `login` y `usar_cookie`: un solo paso con su `espera` alcanza (ver "Consultas BD" en
-  `proyectos.json`).
+- **Cookie jar:** se capturan **todas** las `Set-Cookie` de cada paso (sesión, XSRF, token…) y
+  se reenvían en los siguientes, como un navegador. Para leer la cookie/redirect de un login
+  (302) usá `no_seguir_redirect: true` en ese paso (así se inspecciona el `Location`).
+- **Extracción (CSRF, etc.):** un paso con `extraer: { var, regex }` guarda el 1er grupo del
+  regex del cuerpo en una variable; otros pasos la usan con `var:NOMBRE`. Sirve para el token
+  CSRF de Laravel (ver "ERP" en `proyectos.json`).
+- **Headers por paso:** `headers: { … }` (interpolables con `env:`), ej. la `apikey` de Supabase.
+- **Body:** `cuerpo_form` (urlencoded) o `cuerpo_json` (JSON).
+- **Aserciones (`espera`):** `status` (número o lista), `json_tiene` (claves en un objeto),
+  `json_array_no_vacio` (array con ≥1 fila — confirma que la query trajo datos), `texto_incluye` /
+  `texto_no_incluye` (substring, para HTML — ej. detectar el form de login = no autenticado),
+  `location_incluye` / `location_no_incluye` (sobre el redirect — ej. login OK redirige fuera de
+  `/login`). Corta en el primer paso que falla.
+- **Sin login:** si la función es pública (ej. una consulta GET), omití `requiere_secrets` y el
+  paso de login: un solo paso con su `espera` alcanza (ver "Consultas BD" / "Fichadas").
+- **Tres patrones ya implementados** (ver `proyectos.json`): cookie+token de form (Cubiertas),
+  **Laravel/CSRF** (ERP: GET extrae `_token` → POST con `var:csrf`, valida que redirija fuera de
+  `/login`), y **Supabase Auth** (Capacitaciones: POST a `/auth/v1/token?grant_type=password` con
+  `apikey`, valida `access_token` en el JSON).
 - **Reintentos:** cada paso reintenta hasta 3 veces (backoff) **solo** ante fallas transitorias
   (error de red / 5xx), para no marcar falso `FUNCION_FALLA` por un cold start (Modal/Render que
   escalan a cero). Una falla real (4xx, campo faltante) no se reintenta.

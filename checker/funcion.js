@@ -11,8 +11,10 @@
 // (ver checker/funcion.test.js).
 //
 // Config declarativa (en proyectos.json, bloque `funcion`): una lista de `pasos`, cada uno
-// un request HTTP con una `espera` (aserciones). Los secretos se interpolan con `env:NOMBRE`
-// y NUNCA viven en el repo. Sumar otro servicio = solo agregar su bloque `funcion`.
+// un request HTTP con una `espera` (aserciones). Soporta flujos con login: jar de cookies
+// (se capturan y reenvian todas, browser-like) y extraccion de valores del cuerpo de un paso
+// (ej. token CSRF) para usarlos en el siguiente. Secretos via `env:NOMBRE` (GitHub Secrets);
+// valores extraidos via `var:NOMBRE`. Sumar otro servicio = solo agregar su bloque `funcion`.
 
 const TIMEOUT_MS = 10_000; // corte por request
 // Hasta 3 intentos por paso (delay ANTES de cada uno). Se reintenta SOLO si la falla parece
@@ -30,14 +32,31 @@ export function esTransitorio(resultado) {
   return false;
 }
 
-// ── Interpolacion de secretos ─────────────────────────────────────────────────
+// ── Interpolacion de secretos / variables ─────────────────────────────────────
 
-/** "env:NOMBRE" -> env.NOMBRE ; cualquier otro valor se devuelve tal cual. */
-export function interpolar(valor, env = {}) {
-  if (typeof valor === 'string' && valor.startsWith('env:')) {
-    return env[valor.slice(4)] ?? '';
+/**
+ * Resuelve referencias en un valor de config:
+ *  - "env:NOMBRE" -> proceso/Secret (`ctx.env`).
+ *  - "var:NOMBRE" -> valor extraido de un paso anterior (`ctx.vars`, ej. token CSRF).
+ * Cualquier otro valor se devuelve tal cual.
+ */
+export function interpolar(valor, { env = {}, vars = {} } = {}) {
+  if (typeof valor === 'string') {
+    if (valor.startsWith('env:')) return env[valor.slice(4)] ?? '';
+    if (valor.startsWith('var:')) return vars[valor.slice(4)] ?? '';
   }
   return valor;
+}
+
+/** Aplica un regex al texto y devuelve el 1er grupo (o el match completo). null si no matchea. */
+export function extraerValor(texto, regex) {
+  try {
+    const m = String(texto).match(new RegExp(regex));
+    if (!m) return null;
+    return m[1] ?? m[0];
+  } catch {
+    return null;
+  }
 }
 
 // ── Aserciones (PURA — sin red) ───────────────────────────────────────────────
@@ -51,9 +70,12 @@ export function interpolar(valor, env = {}) {
  *  - json_array_no_vacio: true si el body debe ser un array JSON con al menos un elemento
  *                         (ej. un listado que toca la DB: confirma que trajo filas reales).
  *  - texto_incluye     : substring que debe aparecer en el body (para respuestas HTML).
+ *  - texto_no_incluye  : substring que NO debe aparecer (ej. el form de login => no autenticado).
+ *  - location_incluye / location_no_incluye : substring (que debe / no debe) estar en el header
+ *                         Location del redirect (ej. login OK redirige fuera de "/login").
  *
  * @param {object} espera
- * @param {{status:number|null, json:object|null, texto:string|null, error?:string}} resultado
+ * @param {{status:number|null, json:object|null, texto:string|null, location:string|null, error?:string}} resultado
  * @returns {{ ok: boolean, motivo?: string }}
  */
 export function cumpleEspera(espera = {}, resultado) {
@@ -86,6 +108,24 @@ export function cumpleEspera(espera = {}, resultado) {
     }
   }
 
+  if (typeof espera.texto_no_incluye === 'string') {
+    if (resultado.texto && resultado.texto.includes(espera.texto_no_incluye)) {
+      return { ok: false, motivo: `contiene '${espera.texto_no_incluye}' (no debería)` };
+    }
+  }
+
+  if (typeof espera.location_incluye === 'string') {
+    if (!resultado.location || !resultado.location.includes(espera.location_incluye)) {
+      return { ok: false, motivo: `redirige a '${resultado.location ?? '-'}' (esperaba que incluya '${espera.location_incluye}')` };
+    }
+  }
+
+  if (typeof espera.location_no_incluye === 'string') {
+    if (resultado.location && resultado.location.includes(espera.location_no_incluye)) {
+      return { ok: false, motivo: `redirige a '${resultado.location}' (no debería incluir '${espera.location_no_incluye}')` };
+    }
+  }
+
   return { ok: true };
 }
 
@@ -111,49 +151,66 @@ export function evaluarFuncion(evaluaciones) {
 
 /**
  * Hace UN request del paso y devuelve su resultado crudo. No lanza: la red caida / timeout
- * se devuelven como `{ error }`. Pasa/guarda la cookie de sesion via `ctx`.
+ * se devuelven como `{ error }`. Mantiene un jar de cookies en `ctx.cookies` (se capturan
+ * TODAS las Set-Cookie y se reenvian en cada request, como un navegador) y `ctx.vars` con los
+ * valores extraidos (ej. token CSRF) para interpolar en pasos siguientes.
  *
- * @param {object} paso  definicion del paso (url, metodo, cuerpo_form, guardar_cookie, usar_cookie)
- * @param {{env:object, cookie:string|null}} ctx  estado compartido entre pasos
- * @returns {Promise<{nombre:string, status:number|null, json:object|null, texto:string|null, error?:string}>}
+ * Opciones del paso: url, metodo, cuerpo_form|cuerpo_json, headers, no_seguir_redirect,
+ * extraer:{var,regex}. (`guardar_cookie` se mantiene por compatibilidad: fuerza redirect manual.)
+ *
+ * @param {object} paso
+ * @param {{env:object, vars:object, cookies:object}} ctx  estado compartido entre pasos
+ * @returns {Promise<{nombre:string, status:number|null, json:object|null, texto:string|null, location:string|null, error?:string}>}
  */
 export async function chequearPaso(paso, ctx, { fetchImpl = globalThis.fetch } = {}) {
   const headers = {};
+  const ent = { env: ctx.env, vars: ctx.vars };
+  // Para capturar la cookie de un redirect (login 302) o inspeccionar el Location, no seguirlo.
+  const manual = Boolean(paso.guardar_cookie || paso.no_seguir_redirect);
   const opciones = {
     method: paso.metodo || 'GET',
     headers,
-    // Para capturar la cookie de login hay que ver el Set-Cookie del 302: no seguir el redirect.
-    redirect: paso.guardar_cookie ? 'manual' : 'follow',
+    redirect: manual ? 'manual' : 'follow',
     signal: AbortSignal.timeout(TIMEOUT_MS),
   };
 
   if (paso.cuerpo_form) {
     const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(paso.cuerpo_form)) params.set(k, interpolar(v, ctx.env));
+    for (const [k, v] of Object.entries(paso.cuerpo_form)) params.set(k, interpolar(v, ent));
     headers['content-type'] = 'application/x-www-form-urlencoded';
     opciones.body = params.toString();
   } else if (paso.cuerpo_json) {
     const obj = {};
-    for (const [k, v] of Object.entries(paso.cuerpo_json)) obj[k] = interpolar(v, ctx.env);
+    for (const [k, v] of Object.entries(paso.cuerpo_json)) obj[k] = interpolar(v, ent);
     headers['content-type'] = 'application/json';
     opciones.body = JSON.stringify(obj);
   }
 
-  if (paso.usar_cookie && ctx.cookie) headers['cookie'] = ctx.cookie;
+  // Headers extra del paso (ej. apikey de Supabase), tambien interpolables.
+  if (paso.headers) {
+    for (const [k, v] of Object.entries(paso.headers)) headers[k.toLowerCase()] = interpolar(v, ent);
+  }
+
+  // Reenviar el jar de cookies acumulado.
+  const jar = Object.entries(ctx.cookies || {});
+  if (jar.length > 0) headers['cookie'] = jar.map(([k, v]) => `${k}=${v}`).join('; ');
 
   let res;
   try {
     res = await fetchImpl(paso.url, opciones);
   } catch (err) {
-    return { nombre: paso.nombre, status: null, json: null, texto: null, error: String(err?.message ?? err) };
+    return { nombre: paso.nombre, status: null, json: null, texto: null, location: null, error: String(err?.message ?? err) };
   }
 
-  // Guardar la cookie pedida (ej. "token") para los pasos siguientes.
-  if (paso.guardar_cookie && typeof res.headers?.getSetCookie === 'function') {
-    const cookies = res.headers.getSetCookie();
-    const buscada = cookies.find((c) => c.startsWith(`${paso.guardar_cookie}=`));
-    if (buscada) ctx.cookie = buscada.split(';')[0]; // "token=eyJ..." (sin atributos)
+  // Capturar TODAS las cookies (session, XSRF, token, …) en el jar para los pasos siguientes.
+  if (typeof res.headers?.getSetCookie === 'function') {
+    for (const c of res.headers.getSetCookie()) {
+      const par = c.split(';')[0];
+      const idx = par.indexOf('=');
+      if (idx > 0) ctx.cookies[par.slice(0, idx).trim()] = par.slice(idx + 1).trim();
+    }
   }
+  const location = typeof res.headers?.get === 'function' ? res.headers.get('location') : null;
 
   // Leer el body UNA vez como texto e intentar parsear JSON (para soportar ambas aserciones).
   const texto = await res.text().catch(() => null);
@@ -166,13 +223,19 @@ export async function chequearPaso(paso, ctx, { fetchImpl = globalThis.fetch } =
     }
   }
 
-  return { nombre: paso.nombre, status: res.status, json, texto };
+  // Extraer un valor del cuerpo para pasos siguientes (ej. token CSRF del HTML del login).
+  if (paso.extraer && texto) {
+    const val = extraerValor(texto, paso.extraer.regex);
+    if (val != null) ctx.vars[paso.extraer.var] = val;
+  }
+
+  return { nombre: paso.nombre, status: res.status, json, texto, location };
 }
 
 // ── Orquestador (I/O) ─────────────────────────────────────────────────────────
 
 /**
- * Corre la secuencia de pasos de una funcion, pasando la cookie de sesion entre ellos, y
+ * Corre la secuencia de pasos de una funcion, pasando cookies y variables entre ellos, y
  * decide el estado. Best-effort: nunca lanza.
  *
  * - Si falta algun secret de `requiere_secrets` -> FUNCION_OMITIDA (no toca la red).
@@ -196,7 +259,7 @@ export async function ejecutarFuncion(
     }
   }
 
-  const ctx = { env, cookie: null };
+  const ctx = { env, vars: {}, cookies: {} };
   const evaluaciones = [];
   const inicio = performance.now();
   for (const paso of funcion?.pasos ?? []) {

@@ -77,7 +77,21 @@
     "nombre": "Capacitaciones RRHH",
     "tipo": "pull",
     "url": "https://rhh-lilac.vercel.app/",
-    "plataforma": "Vercel"
+    "plataforma": "Vercel",
+    "funcion": {
+      "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
+      "requiere_secrets": ["CAP_EMAIL", "CAP_PASS", "CAP_SUPABASE_ANON_KEY"],
+      "pasos": [
+        {
+          "nombre": "login",
+          "url": "https://oiplvbvyznxqwjyndlbg.supabase.co/auth/v1/token?grant_type=password",
+          "metodo": "POST",
+          "headers": { "apikey": "env:CAP_SUPABASE_ANON_KEY" },
+          "cuerpo_json": { "email": "env:CAP_EMAIL", "password": "env:CAP_PASS" },
+          "espera": { "status": 200, "json_tiene": ["access_token"] }
+        }
+      ]
+    }
   },
   {
     "nombre": "Sistema Compras",
@@ -91,7 +105,28 @@
     "tipo": "pull",
     "url": "https://mantenimiento.masterbus.net/",
     "plataforma": "propio",
-    "es_dependencia": true
+    "es_dependencia": true,
+    "funcion": {
+      "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
+      "requiere_secrets": ["ERP_EMAIL", "ERP_PASS"],
+      "pasos": [
+        {
+          "nombre": "abrir-login",
+          "url": "https://mantenimiento.masterbus.net/login",
+          "metodo": "GET",
+          "extraer": { "var": "csrf", "regex": "name=\"_token\"[^>]*value=\"([^\"]+)\"" },
+          "espera": { "status": 200, "texto_incluye": "_token" }
+        },
+        {
+          "nombre": "login",
+          "url": "https://mantenimiento.masterbus.net/login",
+          "metodo": "POST",
+          "cuerpo_form": { "_token": "var:csrf", "email": "env:ERP_EMAIL", "password": "env:ERP_PASS" },
+          "no_seguir_redirect": true,
+          "espera": { "status": 302, "location_no_incluye": "/login" }
+        }
+      ]
+    }
   },
   {
     "nombre": "Rotacion",
