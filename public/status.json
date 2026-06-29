@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-29T18:54:07.579Z",
+  "timestamp": "2026-06-29T20:49:53.749Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1516,
+      "latencia_ms": 1955,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-21T21:39:59.882Z",
@@ -19,7 +19,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 308,
+        "duracion_ms": 370,
         "desde": "2026-06-29T17:09:23.168Z"
       },
       "uptimes": {
@@ -33,7 +33,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 295,
+      "latencia_ms": 238,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -41,12 +41,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 17214
+        "uptime_s": 24161
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 219,
+        "duracion_ms": 182,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "uptimes": {
@@ -76,7 +76,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 3179,
+      "latencia_ms": 4452,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-06-29T17:26:50.331Z",
@@ -86,7 +86,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 97,
+        "duracion_ms": 128,
         "desde": "2026-06-29T17:26:50.331Z"
       },
       "uptimes": {
@@ -100,7 +100,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1098,
+      "latencia_ms": 1005,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -120,7 +120,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 790,
+      "latencia_ms": 705,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -148,10 +148,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 81.5,
-        "90": 81.5
+        "30": 81.6,
+        "90": 81.6
       },
-      "uptime": 81.5
+      "uptime": 81.6
     }
   ]
 }
