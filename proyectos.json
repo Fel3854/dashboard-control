@@ -60,7 +60,18 @@
     "url": "https://fel3854--fichadas-mant-fastapi-app.modal.run/health",
     "plataforma": "Modal",
     "tolera_cold_start": true,
-    "salud_json": true
+    "salud_json": true,
+    "funcion": {
+      "descripcion": "Listado de sectores (API real, sin login)",
+      "pasos": [
+        {
+          "nombre": "sectores",
+          "url": "https://fel3854--fichadas-mant-fastapi-app.modal.run/api/sectors",
+          "metodo": "GET",
+          "espera": { "status": 200, "json_array_no_vacio": true }
+        }
+      ]
+    }
   },
   {
     "nombre": "Capacitaciones RRHH",
