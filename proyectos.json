@@ -33,7 +33,18 @@
     "url": "https://masterbus-dashboard.onrender.com/health",
     "plataforma": "Render",
     "tolera_cold_start": true,
-    "salud_json": true
+    "salud_json": true,
+    "funcion": {
+      "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
+      "pasos": [
+        {
+          "nombre": "bases",
+          "url": "https://masterbus-dashboard.onrender.com/api/options/bases",
+          "metodo": "GET",
+          "espera": { "status": 200, "json_array_no_vacio": true }
+        }
+      ]
+    }
   },
   {
     "nombre": "Controles Stock Telegram",

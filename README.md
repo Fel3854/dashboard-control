@@ -156,8 +156,12 @@ detalle al expandir. Si la función falla **aunque el ping esté en verde**, dis
   **Settings → Secrets and variables → Actions**. El workflow ya los pasa al checker.
 - **Cookie de sesión:** un paso con `guardar_cookie` lee el `Set-Cookie` (sin seguir el redirect)
   y los pasos con `usar_cookie: true` la reenvían — así se prueba el camino autenticado.
-- **Aserciones (`espera`):** `status` (número o lista), `json_tiene` (claves presentes),
-  `texto_incluye` (substring, para respuestas HTML). Corta en el primer paso que falla.
+- **Aserciones (`espera`):** `status` (número o lista), `json_tiene` (claves presentes en un
+  objeto), `json_array_no_vacio` (el body es un array con ≥1 fila — confirma que la query trajo
+  datos), `texto_incluye` (substring, para respuestas HTML). Corta en el primer paso que falla.
+- **Sin login:** si la función es pública (ej. una consulta GET), omití `requiere_secrets`,
+  `login` y `usar_cookie`: un solo paso con su `espera` alcanza (ver "Consultas BD" en
+  `proyectos.json`).
 - **Sumar otro servicio** = solo agregar su bloque `funcion` + sus secrets (sin tocar código).
 
 ## Desplegar en GitHub Pages

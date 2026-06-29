@@ -63,6 +63,23 @@ test('cumpleEspera: respuesta HTML cuando se esperaba JSON -> falla', () => {
   assert.match(r.motivo, /no es JSON/);
 });
 
+test('cumpleEspera: json_array_no_vacio con array de filas -> ok', () => {
+  const r = cumpleEspera({ status: 200, json_array_no_vacio: true }, { status: 200, json: [{ id: 1, nombre: 'Base A' }] });
+  assert.equal(r.ok, true);
+});
+
+test('cumpleEspera: json_array_no_vacio con array vacío -> falla', () => {
+  const r = cumpleEspera({ json_array_no_vacio: true }, { status: 200, json: [] });
+  assert.equal(r.ok, false);
+  assert.match(r.motivo, /vacío/);
+});
+
+test('cumpleEspera: json_array_no_vacio cuando no es array -> falla', () => {
+  const r = cumpleEspera({ json_array_no_vacio: true }, { status: 200, json: { error: 'x' } });
+  assert.equal(r.ok, false);
+  assert.match(r.motivo, /no es un array/);
+});
+
 test('cumpleEspera: texto_incluye encuentra el substring -> ok', () => {
   const r = cumpleEspera({ texto_incluye: 'Bienvenido' }, { status: 200, texto: '<h1>Bienvenido</h1>' });
   assert.equal(r.ok, true);

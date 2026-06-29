@@ -32,9 +32,11 @@ export function interpolar(valor, env = {}) {
  * Evalua la `espera` de un paso contra el resultado del fetch. Pura.
  *
  * Vocabulario de `espera`:
- *  - status       : numero o lista de status HTTP aceptados.
- *  - json_tiene   : lista de claves que deben existir en el body JSON.
- *  - texto_incluye: substring que debe aparecer en el body (para respuestas HTML).
+ *  - status            : numero o lista de status HTTP aceptados.
+ *  - json_tiene        : lista de claves que deben existir en el body JSON (objeto).
+ *  - json_array_no_vacio: true si el body debe ser un array JSON con al menos un elemento
+ *                         (ej. un listado que toca la DB: confirma que trajo filas reales).
+ *  - texto_incluye     : substring que debe aparecer en el body (para respuestas HTML).
  *
  * @param {object} espera
  * @param {{status:number|null, json:object|null, texto:string|null, error?:string}} resultado
@@ -48,6 +50,11 @@ export function cumpleEspera(espera = {}, resultado) {
     if (!aceptados.includes(resultado.status)) {
       return { ok: false, motivo: `status ${resultado.status ?? '-'} (esperaba ${aceptados.join('/')})` };
     }
+  }
+
+  if (espera.json_array_no_vacio) {
+    if (!Array.isArray(resultado.json)) return { ok: false, motivo: 'la respuesta no es un array JSON' };
+    if (resultado.json.length === 0) return { ok: false, motivo: 'el array JSON vino vacío' };
   }
 
   if (Array.isArray(espera.json_tiene) && espera.json_tiene.length > 0) {
