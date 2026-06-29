@@ -14,6 +14,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chequearHeartbeat } from './heartbeat.js';
 import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
 import { obtenerSalud } from './salud.js';
+import { ejecutarFuncion } from './funcion.js';
 
 const UPTIME_VENTANA_DIAS = 30; // ventana principal que muestra la fila
 const UPTIME_VENTANAS = [7, 30, 90]; // ventanas extra para el detalle por proyecto
@@ -143,6 +144,16 @@ export function resolverDesde(nombre, estadoNuevo, statusAnterior, ahoraISO) {
   return ahoraISO;
 }
 
+/**
+ * Igual que resolverDesde pero para el SUB-estado funcional (`proyecto.funcion`): conserva
+ * `funcion.desde` si el estado funcional no cambio; si cambio (o es nuevo), `desde` = ahora.
+ */
+export function resolverDesdeFuncion(nombre, estadoNuevo, statusAnterior, ahoraISO) {
+  const previo = statusAnterior?.proyectos?.find((p) => p.nombre === nombre)?.funcion;
+  if (previo && previo.estado === estadoNuevo && previo.desde) return previo.desde;
+  return ahoraISO;
+}
+
 // ── Lectura de archivos ───────────────────────────────────────────────────────
 
 async function leerJSON(ruta) {
@@ -208,6 +219,19 @@ export async function main() {
     // internos (version, base, uptime). Best-effort: si falla, `salud` queda null.
     if (t.tipo === 'pull' && t.salud_json && ['OK', 'LENTO', 'DESPERTANDO'].includes(r.estado)) {
       proyecto.salud = await obtenerSalud(t.url);
+    }
+
+    // Chequeo FUNCIONAL (opt-in): ejecuta una funcion real del servicio (ej. login + una
+    // consulta que toca la DB) y valida la respuesta. Best-effort: si faltan secrets queda
+    // FUNCION_OMITIDA, si falla la red/aserciones queda FUNCION_FALLA; nunca rompe el checker.
+    // Solo tiene sentido si el servidor al menos responde.
+    if (t.tipo === 'pull' && t.funcion && ['OK', 'LENTO', 'DESPERTANDO'].includes(r.estado)) {
+      const f = await ejecutarFuncion(t.funcion, { env: process.env });
+      if (f.estado !== 'FUNCION_OMITIDA') {
+        f.desde = resolverDesdeFuncion(t.nombre, f.estado, anterior, ahoraISO);
+      }
+      proyecto.funcion = f;
+      console.log(`    ↳ funcion: ${f.estado}${f.paso_fallo ? ` (falla en "${f.paso_fallo}": ${f.motivo})` : ''}`);
     }
     proyectos.push(proyecto);
 

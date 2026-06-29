@@ -206,6 +206,27 @@ body {
   background: var(--suave);
 }
 
+/* Chip del chequeo FUNCIONAL (sub-indicador: ¿la función realmente anda?). */
+.metricas .func-chip {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: bold;
+  border: 1px solid var(--borde);
+  background: var(--blanco);
+}
+.func-chip.ok {
+  color: var(--verde);
+  border-color: var(--verde);
+}
+.func-chip.caido {
+  color: var(--blanco);
+  background: var(--rojo);
+  border-color: var(--rojo);
+}
+
 .metricas .latencia {
   display: block;
   margin-top: 4px;

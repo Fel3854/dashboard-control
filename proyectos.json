@@ -4,7 +4,28 @@
     "tipo": "pull",
     "url": "https://sist-cubiertas.vercel.app/health",
     "plataforma": "Vercel",
-    "salud_json": true
+    "salud_json": true,
+    "funcion": {
+      "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
+      "requiere_secrets": ["CUBIERTAS_USER", "CUBIERTAS_PASS"],
+      "pasos": [
+        {
+          "nombre": "login",
+          "url": "https://sist-cubiertas.vercel.app/login",
+          "metodo": "POST",
+          "cuerpo_form": { "usr": "env:CUBIERTAS_USER", "pass": "env:CUBIERTAS_PASS" },
+          "guardar_cookie": "token",
+          "espera": { "status": [200, 302] }
+        },
+        {
+          "nombre": "consulta",
+          "url": "https://sist-cubiertas.vercel.app/ajax/ultimo_fuego",
+          "metodo": "GET",
+          "usar_cookie": true,
+          "espera": { "status": 200, "json_tiene": ["sugerido"] }
+        }
+      ]
+    }
   },
   {
     "nombre": "Consultas BD Mantenimiento",

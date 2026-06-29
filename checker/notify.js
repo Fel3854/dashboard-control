@@ -72,6 +72,35 @@ export function detectarEventos(
       }
       delete mapa[p.nombre];
     }
+
+    // ── Sub-estado FUNCIONAL: alerta aunque el PING este en verde ──────────────
+    // El chequeo funcional (check.js -> funcion.js) puede fallar con el servidor
+    // respondiendo 200. Se trata con la misma logica de caida/recordatorio/recuperado,
+    // pero con clave propia ("funcion:<nombre>") para no pisar el cooldown del servicio.
+    // FUNCION_OMITIDA / sin funcion se ignoran (no hay senal que alertar).
+    const estadoF = p.funcion?.estado;
+    if (estadoF === 'FUNCION_FALLA' || estadoF === 'FUNCION_OK') {
+      const claveF = `funcion:${p.nombre}`;
+      const estadoFPrev = prev?.funcion?.estado;
+      if (estadoF === 'FUNCION_FALLA') {
+        if (estadoFPrev !== 'FUNCION_FALLA') {
+          eventos.push({ tipo: 'funcion_caida', proyecto: p });
+          mapa[claveF] = ahoraISO;
+        } else {
+          const ultima = mapa[claveF] ? Date.parse(mapa[claveF]) : 0;
+          if (ahora - ultima >= cooldownMs) {
+            eventos.push({ tipo: 'funcion_recordatorio', proyecto: p });
+            mapa[claveF] = ahoraISO;
+          }
+        }
+      } else {
+        // FUNCION_OK: si venia fallando, avisar recuperacion y limpiar el registro.
+        if (estadoFPrev === 'FUNCION_FALLA' || mapa[claveF]) {
+          eventos.push({ tipo: 'funcion_recuperada', proyecto: p });
+        }
+        delete mapa[claveF];
+      }
+    }
   }
 
   return { eventos, alertasEstado: mapa };
@@ -83,24 +112,43 @@ const ETIQUETA = {
   caida: '🔴 CAÍDO',
   recordatorio: '🔴 SIGUE CAÍDO',
   recuperado: '🟢 RECUPERADO',
+  funcion_caida: '🔴 FUNCIÓN FALLA',
+  funcion_recordatorio: '🔴 FUNCIÓN SIGUE FALLANDO',
+  funcion_recuperada: '🟢 FUNCIÓN OK',
 };
+
+const TIPOS_FUNCION = new Set(['funcion_caida', 'funcion_recordatorio', 'funcion_recuperada']);
+const TIPOS_RECUPERADO = new Set(['recuperado', 'funcion_recuperada']);
 
 /** Construye asunto + cuerpo (texto plano) a partir de los eventos. Pura. */
 export function construirEmail(eventos) {
-  const problemas = eventos.filter((e) => e.tipo !== 'recuperado').length;
-  const recuperados = eventos.filter((e) => e.tipo === 'recuperado').length;
+  const caidos = eventos.filter((e) => e.tipo === 'caida' || e.tipo === 'recordatorio').length;
+  const funcionesFallando = eventos.filter(
+    (e) => e.tipo === 'funcion_caida' || e.tipo === 'funcion_recordatorio',
+  ).length;
+  const recuperados = eventos.filter((e) => TIPOS_RECUPERADO.has(e.tipo)).length;
 
   const resumen = [];
-  if (problemas) resumen.push(`🔴 ${problemas} caído/s`);
+  if (caidos) resumen.push(`🔴 ${caidos} caído/s`);
+  if (funcionesFallando) resumen.push(`🔴 ${funcionesFallando} función/es fallando`);
   if (recuperados) resumen.push(`🟢 ${recuperados} recuperado/s`);
   const asunto = `[Master Bus] ${resumen.join(' · ')}`;
 
   const lineas = ['Dashboard de Control — cambios detectados:', ''];
   for (const { tipo, proyecto: p } of eventos) {
     lineas.push(`${ETIQUETA[tipo]} — ${p.nombre} (${p.plataforma ?? '-'})`);
-    lineas.push(
-      `   http ${p.http_code ?? '-'} · ${p.latencia_ms ?? '-'} ms · desde ${p.desde}`,
-    );
+    if (TIPOS_FUNCION.has(tipo)) {
+      const f = p.funcion ?? {};
+      if (tipo === 'funcion_recuperada') {
+        lineas.push(`   función «${f.descripcion ?? '-'}» volvió a responder · desde ${f.desde ?? '-'}`);
+      } else {
+        lineas.push(
+          `   función «${f.descripcion ?? '-'}» · falló en "${f.paso_fallo ?? '-'}": ${f.motivo ?? '-'} · desde ${f.desde ?? '-'}`,
+        );
+      }
+    } else {
+      lineas.push(`   http ${p.http_code ?? '-'} · ${p.latencia_ms ?? '-'} ms · desde ${p.desde}`);
+    }
   }
   lineas.push('', `Panel: ${PANEL_URL}`);
 

@@ -85,6 +85,47 @@ test('detectarEventos: LENTO no dispara alertas', () => {
   assert.equal(eventos.length, 0);
 });
 
+// ── detectarEventos: sub-estado FUNCIONAL (ping verde, funcion rota) ──────────
+
+// Helper: proyecto con ping OK pero con bloque funcion.
+const proyF = (nombre, estadoF, extra = {}) =>
+  proy(nombre, 'OK', { funcion: { estado: estadoF, descripcion: 'login + consulta', desde: new Date(T0).toISOString(), ...extra } });
+
+test('detectarEventos: FUNCION_OK -> FUNCION_FALLA dispara funcion_caida (ping en verde)', () => {
+  const anterior = status([proyF('A', 'FUNCION_OK')]);
+  const nuevo = status([proyF('A', 'FUNCION_FALLA', { paso_fallo: 'consulta', motivo: "falta el campo 'sugerido'" })]);
+  const { eventos, alertasEstado } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'funcion_caida');
+  assert.ok(alertasEstado['funcion:A'], 'usa clave de cooldown separada para la funcion');
+  assert.equal(alertasEstado['A'], undefined, 'no toca el cooldown del servicio');
+});
+
+test('detectarEventos: FUNCION_FALLA -> FUNCION_OK dispara funcion_recuperada y limpia', () => {
+  const anterior = status([proyF('A', 'FUNCION_FALLA')]);
+  const nuevo = status([proyF('A', 'FUNCION_OK')]);
+  const registro = { 'funcion:A': new Date(T0 - 1 * HORA).toISOString() };
+  const { eventos, alertasEstado } = detectarEventos(nuevo, anterior, registro, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'funcion_recuperada');
+  assert.equal(alertasEstado['funcion:A'], undefined);
+});
+
+test('detectarEventos: funcion sigue fallando sin cumplir cooldown -> sin eventos', () => {
+  const anterior = status([proyF('A', 'FUNCION_FALLA')]);
+  const nuevo = status([proyF('A', 'FUNCION_FALLA')]);
+  const registro = { 'funcion:A': new Date(T0 - 1 * HORA).toISOString() };
+  const { eventos } = detectarEventos(nuevo, anterior, registro, { ahora: T0, cooldownMs: 6 * HORA });
+  assert.equal(eventos.length, 0);
+});
+
+test('detectarEventos: FUNCION_OMITIDA no genera eventos', () => {
+  const anterior = status([proyF('A', 'FUNCION_OK')]);
+  const nuevo = status([proyF('A', 'FUNCION_OMITIDA')]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos.length, 0);
+});
+
 // ── construirEmail ────────────────────────────────────────────────────────────
 
 test('construirEmail: el asunto resume caidos y recuperados', () => {
@@ -97,6 +138,20 @@ test('construirEmail: el asunto resume caidos y recuperados', () => {
   assert.match(asunto, /1 recuperado/);
   assert.match(cuerpo, /CAÍDO — A/);
   assert.match(cuerpo, /RECUPERADO — B/);
+});
+
+test('construirEmail: evento funcional muestra el paso y el motivo de la falla', () => {
+  const eventos = [
+    {
+      tipo: 'funcion_caida',
+      proyecto: proyF('Cubiertas', 'FUNCION_FALLA', { paso_fallo: 'consulta', motivo: "falta el campo 'sugerido'" }),
+    },
+  ];
+  const { asunto, cuerpo } = construirEmail(eventos);
+  assert.match(asunto, /1 función\/es fallando/);
+  assert.match(cuerpo, /FUNCIÓN FALLA — Cubiertas/);
+  assert.match(cuerpo, /falló en "consulta"/);
+  assert.match(cuerpo, /sugerido/);
 });
 
 // ── notify (dry-run, no persiste ni envia) ────────────────────────────────────

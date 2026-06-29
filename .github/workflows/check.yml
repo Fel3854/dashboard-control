@@ -63,6 +63,10 @@ jobs:
         env:
           # Si se corre a mano con el input "test_alerta", manda una alerta de prueba.
           TEST_ALERTA: ${{ inputs.test_alerta && '1' || '' }}
+          # Credenciales del chequeo FUNCIONAL de Cubiertas (login + consulta). Si no estan
+          # cargadas como Secrets, el chequeo queda FUNCION_OMITIDA y el checker sigue igual.
+          CUBIERTAS_USER: ${{ secrets.CUBIERTAS_USER }}
+          CUBIERTAS_PASS: ${{ secrets.CUBIERTAS_PASS }}
         run: node checker/check.js
 
       # Persiste status.json ("desde"), alertas-estado.json (cooldown) e history.json (uptime).

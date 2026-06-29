@@ -20,6 +20,13 @@ const ESTADOS = {
   SIN_DATOS: { emoji: '⚪', clase: 'sindatos', label: 'SIN DATOS' },
 };
 
+// Sub-estado FUNCIONAL (chequeo que ejecuta una funcion real, no solo el ping).
+// FUNCION_OMITIDA (sin credenciales) no muestra chip: no se pudo probar.
+const FUNCION = {
+  FUNCION_OK: { emoji: '🟢', clase: 'ok', label: 'función OK' },
+  FUNCION_FALLA: { emoji: '🔴', clase: 'caido', label: 'función falla' },
+};
+
 const $ = (sel) => document.querySelector(sel);
 
 // Filas abiertas (por nombre): se preserva entre auto-refrescos para no colapsarlas.
@@ -94,6 +101,43 @@ function saludHTML(p) {
     </div>`;
 }
 
+/** Chip secundario en la fila: el resultado del chequeo FUNCIONAL (si lo hay). */
+function funcionChip(p) {
+  const f = p.funcion;
+  if (!f) return '';
+  const info = FUNCION[f.estado];
+  if (!info) return ''; // FUNCION_OMITIDA u otros: no se probo, no se muestra chip
+  const titulo = f.descripcion ? `${f.descripcion}` : 'chequeo funcional';
+  return `<span class="func-chip ${info.clase}" title="${escapar(titulo)}">${info.emoji} ${escapar(info.label)}</span>`;
+}
+
+/** Bloque "Función probada" en el detalle: qué se probó, resultado, paso que falló y duración. */
+function funcionDetalleHTML(p) {
+  const f = p.funcion;
+  if (!f) return '';
+  const items = [];
+  if (f.descripcion) items.push(`<span class="salud-item">prueba <b>${escapar(String(f.descripcion))}</b></span>`);
+
+  let estadoTxt, claseEstado;
+  if (f.estado === 'FUNCION_OK') { estadoTxt = '🟢 función OK'; claseEstado = 'salud-ok'; }
+  else if (f.estado === 'FUNCION_FALLA') { estadoTxt = '🔴 función falla'; claseEstado = 'salud-err'; }
+  else { estadoTxt = '⚪ no probada (sin credenciales)'; claseEstado = ''; }
+  items.push(`<span class="salud-item">resultado <b class="${claseEstado}">${escapar(estadoTxt)}</b></span>`);
+
+  if (f.estado === 'FUNCION_FALLA' && f.paso_fallo) {
+    const motivo = f.motivo ? ` — ${escapar(String(f.motivo))}` : '';
+    items.push(`<span class="salud-item">falló en <b class="salud-err">${escapar(String(f.paso_fallo))}</b>${motivo}</span>`);
+  }
+  if (f.duracion_ms != null) items.push(`<span class="salud-item">duración <b>${escapar(String(f.duracion_ms))} ms</b></span>`);
+  if (f.desde) items.push(`<span class="salud-item">desde <b>${escapar(hace(f.desde))}</b></span>`);
+
+  return `
+    <div class="detalle-salud">
+      <div class="detalle-titulo">Función probada</div>
+      <div class="salud-items">${items.join('')}</div>
+    </div>`;
+}
+
 /** Detalle expandible de un proyecto: uptimes por ventana + ultimos cambios de estado. */
 function detalleHTML(p) {
   const u = p.uptimes ?? {};
@@ -139,6 +183,7 @@ function detalleHTML(p) {
     <div class="detalle" id="detalle-${escapar(slugId(p.nombre))}">
       <div class="detalle-uptimes"><span class="up-label">uptime</span>${filasUp}</div>
       <div class="detalle-datos">${datosHTML}</div>
+      ${funcionDetalleHTML(p)}
       ${saludHTML(p)}
       <div class="detalle-historial">
         <div class="detalle-titulo">Últimos cambios de estado</div>
@@ -185,6 +230,7 @@ function filaHTML(p, ventanaDias) {
         </div>
         <div class="metricas">
           <span class="estado-label ${info.clase}">${info.label}</span>
+          ${funcionChip(p)}
           <span class="latencia">${metrica}</span>
           ${uptime}
         </div>

@@ -121,6 +121,45 @@ internos en `status.json` (`salud`), que el panel muestra en el detalle de la fi
 - Es best-effort: si el endpoint no responde JSON o falla el parseo, `salud` queda `null` y no
   rompe el chequeo (el estado sigue saliendo del ping normal).
 
+### Chequeo funcional (`funcion`) — “¿de verdad funciona?”
+
+El ping (y hasta `db: ok` del `/health`) confirma que el server contesta, pero **no** que una
+función real ande: el login puede estar roto, una query contra una tabla real puede fallar, o
+un deploy puede haber roto la lógica detrás de un front que igual carga. El chequeo funcional
+**ejecuta una función real** del servicio vía HTTP (la misma que dispararía un click) y **valida
+la respuesta** — sin navegador, solo `fetch` nativo (cero dependencias). Lo hace
+[`checker/funcion.js`](checker/funcion.js); la decisión (`evaluarFuncion`/`cumpleEspera`) es pura
+y testeada (`checker/funcion.test.js`).
+
+Es **opt-in y best-effort**: se activa agregando un bloque `funcion` al target. Resultado en
+`status.json` (`funcion.estado`): `FUNCION_OK`, `FUNCION_FALLA` (con `paso_fallo` + `motivo`) o
+`FUNCION_OMITIDA` (faltan credenciales). El panel muestra un chip “función 🟢/🔴” en la fila y el
+detalle al expandir. Si la función falla **aunque el ping esté en verde**, dispara alerta
+(email/Telegram) con su propio cooldown.
+
+```jsonc
+"funcion": {
+  "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
+  "requiere_secrets": ["CUBIERTAS_USER", "CUBIERTAS_PASS"],  // si faltan -> FUNCION_OMITIDA
+  "pasos": [
+    { "nombre": "login", "url": ".../login", "metodo": "POST",
+      "cuerpo_form": { "usr": "env:CUBIERTAS_USER", "pass": "env:CUBIERTAS_PASS" },
+      "guardar_cookie": "token", "espera": { "status": [200, 302] } },
+    { "nombre": "consulta", "url": ".../ajax/ultimo_fuego", "metodo": "GET",
+      "usar_cookie": true, "espera": { "status": 200, "json_tiene": ["sugerido"] } }
+  ]
+}
+```
+
+- **Secretos:** valores `env:NOMBRE` se leen del entorno (GitHub Secrets), **nunca** del repo.
+  Cargá `CUBIERTAS_USER`/`CUBIERTAS_PASS` (un usuario de prueba de solo-lectura) en
+  **Settings → Secrets and variables → Actions**. El workflow ya los pasa al checker.
+- **Cookie de sesión:** un paso con `guardar_cookie` lee el `Set-Cookie` (sin seguir el redirect)
+  y los pasos con `usar_cookie: true` la reenvían — así se prueba el camino autenticado.
+- **Aserciones (`espera`):** `status` (número o lista), `json_tiene` (claves presentes),
+  `texto_incluye` (substring, para respuestas HTML). Corta en el primer paso que falla.
+- **Sumar otro servicio** = solo agregar su bloque `funcion` + sus secrets (sin tocar código).
+
 ## Desplegar en GitHub Pages
 
 1. Subí el repo a GitHub.

@@ -6,6 +6,35 @@
     "plataforma": "Demo"
   },
   {
+    "nombre": "Servicio con chequeo FUNCIONAL (opcional)",
+    "tipo": "pull",
+    "url": "https://example.com/health",
+    "plataforma": "Demo",
+    "salud_json": true,
+    "_comment_funcion": "OPCIONAL. El ping dice 'responde'; esto ejecuta una funcion real (ej. login + una consulta que toca la DB) y valida la respuesta. Secretos via 'env:NOMBRE' (cargar como GitHub Secrets, nunca en el repo). Si faltan, el chequeo queda FUNCION_OMITIDA y no rompe nada. Aserciones de 'espera': status (numero o lista), json_tiene (claves presentes), texto_incluye (substring para HTML).",
+    "funcion": {
+      "descripcion": "Login + una consulta que toca la base",
+      "requiere_secrets": ["DEMO_USER", "DEMO_PASS"],
+      "pasos": [
+        {
+          "nombre": "login",
+          "url": "https://example.com/login",
+          "metodo": "POST",
+          "cuerpo_form": { "usr": "env:DEMO_USER", "pass": "env:DEMO_PASS" },
+          "guardar_cookie": "token",
+          "espera": { "status": [200, 302] }
+        },
+        {
+          "nombre": "consulta",
+          "url": "https://example.com/api/algo",
+          "metodo": "GET",
+          "usar_cookie": true,
+          "espera": { "status": 200, "json_tiene": ["resultado"] }
+        }
+      ]
+    }
+  },
+  {
     "nombre": "Servicio inexistente (CAIDO)",
     "tipo": "pull",
     "url": "https://no-existe-xyz.invalid/",
