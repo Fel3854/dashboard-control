@@ -15,6 +15,20 @@
 // y NUNCA viven en el repo. Sumar otro servicio = solo agregar su bloque `funcion`.
 
 const TIMEOUT_MS = 10_000; // corte por request
+// Hasta 3 intentos por paso (delay ANTES de cada uno). Se reintenta SOLO si la falla parece
+// transitoria (cold start / blip de red): asi un servicio que escala a cero (ej. Modal/Render)
+// no genera falsos FUNCION_FALLA. Una falla real (401, campo faltante) no se reintenta.
+const DELAYS_FUNCION = [0, 1_500, 3_500];
+
+/** Pausa `ms` milisegundos. Inyectable en tests con un no-op para no esperar el backoff. */
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** ¿La falla del paso parece transitoria (cold start / gateway) y conviene reintentar? */
+export function esTransitorio(resultado) {
+  if (resultado.error) return true; // red caida / connection reset / timeout
+  if (typeof resultado.status === 'number' && resultado.status >= 500) return true; // 502/503/504
+  return false;
+}
 
 // ── Interpolacion de secretos ─────────────────────────────────────────────────
 
@@ -162,13 +176,17 @@ export async function chequearPaso(paso, ctx, { fetchImpl = globalThis.fetch } =
  * decide el estado. Best-effort: nunca lanza.
  *
  * - Si falta algun secret de `requiere_secrets` -> FUNCION_OMITIDA (no toca la red).
- * - Corta en el primer paso que falla (no tiene sentido seguir si el login no anduvo).
+ * - Reintenta cada paso ante fallas transitorias (cold start / 5xx); corta en el primer paso
+ *   que falla de verdad (no tiene sentido seguir si el login no anduvo).
  *
  * @param {object} funcion  bloque `funcion` del target
- * @param {{ fetchImpl?:Function, env?:object }} opciones
+ * @param {{ fetchImpl?:Function, env?:object, sleep?:Function }} opciones
  * @returns {Promise<{estado:string, descripcion?:string, paso_fallo?:string, motivo?:string, duracion_ms?:number}>}
  */
-export async function ejecutarFuncion(funcion, { fetchImpl = globalThis.fetch, env = {} } = {}) {
+export async function ejecutarFuncion(
+  funcion,
+  { fetchImpl = globalThis.fetch, env = {}, sleep: sleepImpl = sleep } = {},
+) {
   const descripcion = funcion?.descripcion ?? null;
 
   // Secrets faltantes -> se omite (degradacion elegante, como email/Telegram opcionales).
@@ -182,8 +200,14 @@ export async function ejecutarFuncion(funcion, { fetchImpl = globalThis.fetch, e
   const evaluaciones = [];
   const inicio = performance.now();
   for (const paso of funcion?.pasos ?? []) {
-    const r = await chequearPaso(paso, ctx, { fetchImpl });
-    const e = cumpleEspera(paso.espera, r);
+    let r, e;
+    // Reintenta con backoff solo si la falla es transitoria (cold start / blip / 5xx).
+    for (const delay of DELAYS_FUNCION) {
+      if (delay > 0) await sleepImpl(delay);
+      r = await chequearPaso(paso, ctx, { fetchImpl });
+      e = cumpleEspera(paso.espera, r);
+      if (e.ok || !esTransitorio(r)) break; // exito, o falla REAL (no transitoria): no reintentar
+    }
     evaluaciones.push({ nombre: paso.nombre, ok: e.ok, motivo: e.motivo });
     if (!e.ok) break; // un paso roto frena la cadena (ej. sin login no se puede consultar)
   }

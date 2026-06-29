@@ -162,6 +162,9 @@ detalle al expandir. Si la función falla **aunque el ping esté en verde**, dis
 - **Sin login:** si la función es pública (ej. una consulta GET), omití `requiere_secrets`,
   `login` y `usar_cookie`: un solo paso con su `espera` alcanza (ver "Consultas BD" en
   `proyectos.json`).
+- **Reintentos:** cada paso reintenta hasta 3 veces (backoff) **solo** ante fallas transitorias
+  (error de red / 5xx), para no marcar falso `FUNCION_FALLA` por un cold start (Modal/Render que
+  escalan a cero). Una falla real (4xx, campo faltante) no se reintenta.
 - **Sumar otro servicio** = solo agregar su bloque `funcion` + sus secrets (sin tocar código).
 
 ## Desplegar en GitHub Pages

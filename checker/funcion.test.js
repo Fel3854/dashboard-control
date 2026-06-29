@@ -4,7 +4,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar } from './funcion.js';
+import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar, esTransitorio } from './funcion.js';
+
+const noopSleep = async () => {}; // anula el backoff de reintentos en los tests
 
 // Fabrica una respuesta tipo fetch a partir de { status, body, setCookie }.
 function respuesta({ status = 200, body = '', setCookie = [] } = {}) {
@@ -167,10 +169,50 @@ test('ejecutarFuncion: secret faltante -> FUNCION_OMITIDA sin tocar la red', asy
   assert.equal(fetchImpl.llamadas(), 0, 'no debe hacer ningun fetch');
 });
 
-test('ejecutarFuncion: red caida en el login -> FUNCION_FALLA con motivo de red', async () => {
+test('ejecutarFuncion: red caida persistente -> FUNCION_FALLA tras 3 reintentos', async () => {
   const fetchImpl = fetchMock([{ throw: true }]);
-  const r = await ejecutarFuncion(funcionCubiertas, { fetchImpl, env: { U: 'x', P: 'y' } });
+  const r = await ejecutarFuncion(funcionCubiertas, { fetchImpl, env: { U: 'x', P: 'y' }, sleep: noopSleep });
   assert.equal(r.estado, 'FUNCION_FALLA');
   assert.equal(r.paso_fallo, 'login');
   assert.match(r.motivo, /red/);
+  assert.equal(fetchImpl.llamadas(), 3, 'reintenta la falla transitoria hasta 3 veces');
+});
+
+// ── Reintentos ante fallas TRANSITORIAS (cold start / 5xx) ────────────────────
+
+test('esTransitorio: red y 5xx son transitorios; 4xx y assert-fail no', () => {
+  assert.equal(esTransitorio({ error: 'fetch failed' }), true);
+  assert.equal(esTransitorio({ status: 503 }), true);
+  assert.equal(esTransitorio({ status: 401 }), false);
+  assert.equal(esTransitorio({ status: 200 }), false);
+});
+
+test('ejecutarFuncion: cold start (red falla y luego responde) -> reintenta y FUNCION_OK', async () => {
+  const fetchImpl = fetchMock([
+    { throw: true }, // 1er intento del login: blip de cold start
+    { status: 302, setCookie: ['token=abc'] }, // 2do intento: ya despierto
+    { status: 200, body: { sugerido: '1001' } }, // consulta
+  ]);
+  const r = await ejecutarFuncion(funcionCubiertas, { fetchImpl, env: { U: 'x', P: 'y' }, sleep: noopSleep });
+  assert.equal(r.estado, 'FUNCION_OK');
+  assert.equal(fetchImpl.llamadas(), 3);
+});
+
+test('ejecutarFuncion: 503 y luego 200 -> reintenta el paso y FUNCION_OK', async () => {
+  const publica = {
+    descripcion: 'consulta pública',
+    pasos: [{ nombre: 'lista', url: 'https://x.test/api/cosas', metodo: 'GET', espera: { status: 200, json_array_no_vacio: true } }],
+  };
+  const fetchImpl = fetchMock([{ status: 503 }, { status: 200, body: [{ id: 1 }] }]);
+  const r = await ejecutarFuncion(publica, { fetchImpl, env: {}, sleep: noopSleep });
+  assert.equal(r.estado, 'FUNCION_OK');
+  assert.equal(fetchImpl.llamadas(), 2);
+});
+
+test('ejecutarFuncion: 401 NO se reintenta (falla real, no transitoria)', async () => {
+  const fetchImpl = fetchMock([{ status: 401 }, { status: 200, body: { sugerido: '1' } }]);
+  const r = await ejecutarFuncion(funcionCubiertas, { fetchImpl, env: { U: 'x', P: 'mal' }, sleep: noopSleep });
+  assert.equal(r.estado, 'FUNCION_FALLA');
+  assert.equal(r.paso_fallo, 'login');
+  assert.equal(fetchImpl.llamadas(), 1, 'una falla real no se reintenta');
 });
