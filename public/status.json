@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-29T17:15:05.246Z",
+  "timestamp": "2026-06-29T17:22:02.274Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 812,
+      "latencia_ms": 1507,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-21T21:39:59.882Z",
@@ -14,12 +14,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 343
+        "uptime_s": 1
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 253,
+        "duracion_ms": 350,
         "desde": "2026-06-29T17:09:23.168Z"
       },
       "uptimes": {
@@ -33,7 +33,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 284,
+      "latencia_ms": 400,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -41,7 +41,7 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 11271
+        "uptime_s": 11689
       },
       "funcion": {
         "estado": "FUNCION_OK",
@@ -60,7 +60,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 98,
+      "latencia_ms": 83,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -75,13 +75,21 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
-      "estado": "LENTO",
-      "latencia_ms": 4346,
+      "estado": "OK",
+      "latencia_ms": 130,
       "http_code": 200,
       "plataforma": "Modal",
-      "desde": "2026-06-25T12:03:21.826Z",
+      "desde": "2026-06-29T17:22:02.274Z",
       "salud": {
         "status": "ok"
+      },
+      "funcion": {
+        "estado": "FUNCION_FALLA",
+        "descripcion": "Listado de sectores (API real, sin login)",
+        "duracion_ms": 6924,
+        "paso_fallo": "sectores",
+        "motivo": "error de red: fetch failed",
+        "desde": "2026-06-29T17:22:02.274Z"
       },
       "uptimes": {
         "7": 100,
@@ -94,7 +102,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 248,
+      "latencia_ms": 978,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -109,7 +117,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 485,
+      "latencia_ms": 678,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
