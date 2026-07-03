@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-07-03T19:26:49.053Z",
+  "timestamp": "2026-07-03T20:39:55.222Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1705,
+      "latencia_ms": 1621,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-21T21:39:59.882Z",
@@ -19,7 +19,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 364,
+        "duracion_ms": 409,
         "desde": "2026-06-29T17:09:23.168Z"
       },
       "uptimes": {
@@ -33,7 +33,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 245,
+      "latencia_ms": 312,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-06-07T12:11:19.648Z",
@@ -41,12 +41,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 364775
+        "uptime_s": 369162
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 202,
+        "duracion_ms": 181,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "uptimes": {
@@ -60,7 +60,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 71,
+      "latencia_ms": 75,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-06-05T01:40:43.709Z",
@@ -76,7 +76,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 3128,
+      "latencia_ms": 4235,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-07-01T23:18:20.075Z",
@@ -86,7 +86,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 76,
+        "duracion_ms": 275,
         "desde": "2026-06-29T17:26:50.331Z"
       },
       "uptimes": {
@@ -100,7 +100,7 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1096,
+      "latencia_ms": 1070,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-06-17T16:04:31.659Z",
@@ -120,7 +120,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 554,
+      "latencia_ms": 581,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-06-06T11:56:38.725Z",
@@ -148,10 +148,10 @@
       "max_silencio_horas": 26,
       "uptimes": {
         "7": 100,
-        "30": 84.1,
-        "90": 84.1
+        "30": 84.2,
+        "90": 84.2
       },
-      "uptime": 84.1
+      "uptime": 84.2
     }
   ]
 }
