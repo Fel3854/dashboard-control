@@ -224,6 +224,11 @@
       "nombre": "Capacitaciones RRHH",
       "estado": "LENTO",
       "timestamp": "2026-07-05T15:40:19.389Z"
+    },
+    {
+      "nombre": "Capacitaciones RRHH",
+      "estado": "OK",
+      "timestamp": "2026-07-05T17:52:03.504Z"
     }
   ]
 }
