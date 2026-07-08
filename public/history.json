@@ -229,6 +229,11 @@
       "nombre": "Capacitaciones RRHH",
       "estado": "OK",
       "timestamp": "2026-07-05T17:52:03.504Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "DESPERTANDO",
+      "timestamp": "2026-07-08T04:29:02.521Z"
     }
   ]
 }
