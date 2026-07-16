@@ -304,6 +304,11 @@
       "nombre": "Controles Stock Telegram",
       "estado": "LENTO",
       "timestamp": "2026-07-16T17:20:23.838Z"
+    },
+    {
+      "nombre": "Controles Stock Telegram",
+      "estado": "OK",
+      "timestamp": "2026-07-16T18:41:40.354Z"
     }
   ]
 }
