@@ -329,6 +329,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-07-17T10:59:12.660Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-07-17T12:17:25.720Z"
     }
   ]
 }
