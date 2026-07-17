@@ -324,6 +324,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "LENTO",
       "timestamp": "2026-07-17T09:16:50.943Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-07-17T10:59:12.660Z"
     }
   ]
 }
