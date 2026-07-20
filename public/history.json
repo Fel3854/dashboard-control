@@ -389,6 +389,11 @@
       "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-07-20T14:54:47.840Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "OK",
+      "timestamp": "2026-07-20T16:25:46.810Z"
     }
   ]
 }
