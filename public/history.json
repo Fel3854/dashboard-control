@@ -379,6 +379,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-07-20T04:09:24.498Z"
+    },
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "LENTO",
+      "timestamp": "2026-07-20T12:33:41.246Z"
     }
   ]
 }
