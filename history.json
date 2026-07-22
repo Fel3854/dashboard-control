@@ -394,6 +394,11 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-07-20T16:25:46.810Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "DESPERTANDO",
+      "timestamp": "2026-07-22T17:56:35.458Z"
     }
   ]
 }
