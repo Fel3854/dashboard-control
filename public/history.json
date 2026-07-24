@@ -414,6 +414,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-07-24T09:38:43.466Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "DESPERTANDO",
+      "timestamp": "2026-07-24T11:24:40.815Z"
     }
   ]
 }
