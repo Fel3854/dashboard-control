@@ -439,6 +439,11 @@
       "nombre": "Controles Stock Telegram",
       "estado": "OK",
       "timestamp": "2026-07-24T22:16:49.684Z"
+    },
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "LENTO",
+      "timestamp": "2026-07-25T14:24:06.514Z"
     }
   ]
 }
