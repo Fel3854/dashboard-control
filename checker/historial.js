@@ -91,6 +91,24 @@ export function calcularUptime(eventosProyecto, { ahora = Date.now(), ventanaDia
 }
 
 /**
+ * True si un proyecto "flapea": cambio de estado demasiadas veces en una ventana corta.
+ * Sirve para NO spamear una alerta por cada rebote (OK<->CAIDO<->LENTO): en su lugar se
+ * emite un solo aviso de "inestable". Pura.
+ *
+ * @param {Array<{timestamp:string}>} eventosProyecto transiciones de UN proyecto
+ * @returns {boolean}
+ */
+export function esFlapping(eventosProyecto, { ahora = Date.now(), ventanaMin = 60, maxTransiciones = 4 } = {}) {
+  const desde = ahora - ventanaMin * 60_000;
+  let n = 0;
+  for (const e of eventosProyecto ?? []) {
+    const ts = Date.parse(e.timestamp);
+    if (Number.isFinite(ts) && ts >= desde && ts <= ahora) n++;
+  }
+  return n >= maxTransiciones;
+}
+
+/**
  * Recorta el historial a `retencionDias`, pero conserva por proyecto el ultimo evento
  * anterior al limite (ancla) para no perder el estado de arranque del calculo de uptime.
  */

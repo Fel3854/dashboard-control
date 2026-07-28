@@ -94,13 +94,6 @@
     }
   },
   {
-    "nombre": "Sistema Compras",
-    "tipo": "pull",
-    "url": "https://COMPLETAR-compras.up.railway.app/health",
-    "plataforma": "Railway",
-    "salud_json": true
-  },
-  {
     "nombre": "ERP Masterbus",
     "tipo": "pull",
     "url": "https://mantenimiento.masterbus.net/",

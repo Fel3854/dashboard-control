@@ -12,7 +12,7 @@ const haceHoras = (h) => new Date(T0 - h * HORA).toISOString();
 
 test('slug: normaliza acentos y espacios', () => {
   assert.equal(slug('Rotación'), 'rotacion');
-  assert.equal(slug('Sistema Compras'), 'sistema-compras');
+  assert.equal(slug('Controles Stock Telegram'), 'controles-stock-telegram');
 });
 
 test('evaluarHeartbeat: reporte reciente -> OK', () => {

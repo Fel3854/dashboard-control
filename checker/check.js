@@ -15,6 +15,8 @@ import { chequearHeartbeat } from './heartbeat.js';
 import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
 import { obtenerSalud } from './salud.js';
 import { ejecutarFuncion } from './funcion.js';
+import { obtenerCertificado, hostHttps } from './tls.js';
+import { enMantenimiento, leerVentanas } from './mantenimiento.js';
 
 const UPTIME_VENTANA_DIAS = 30; // ventana principal que muestra la fila
 const UPTIME_VENTANAS = [7, 30, 90]; // ventanas extra para el detalle por proyecto
@@ -180,6 +182,7 @@ export async function main() {
   const targets = await leerJSON(configPath);
   const anterior = (await existe(statusPath)) ? await leerJSON(statusPath) : null;
   const history = (await existe(historyPath)) ? await leerJSON(historyPath) : { eventos: [] };
+  const ventanas = await leerVentanas(); // ventanas de mantenimiento (silencian alertas)
 
   const ahora = Date.now();
   const ahoraISO = new Date(ahora).toISOString();
@@ -215,6 +218,12 @@ export async function main() {
     if (t.tipo === 'heartbeat') proyecto.ultima_corrida = r.ultima_corrida ?? null;
     if (t.max_silencio_horas != null) proyecto.max_silencio_horas = t.max_silencio_horas;
 
+    // Criticidad: un servicio critico escala mas rapido en las alertas. Por defecto, una
+    // dependencia (es_dependencia) es critica; se puede forzar con "critico": true.
+    if (t.critico || t.es_dependencia) proyecto.critico = true;
+    // Ventana de mantenimiento activa: el estado se registra igual, pero notify.js NO alerta.
+    if (enMantenimiento(t.nombre, ahora, ventanas)) proyecto.mantenimiento = true;
+
     // Chequeo profundo (opt-in): si el target expone un /health JSON y respondio, leer sus
     // internos (version, base, uptime). Best-effort: si falla, `salud` queda null.
     if (t.tipo === 'pull' && t.salud_json && ['OK', 'LENTO', 'DESPERTANDO'].includes(r.estado)) {
@@ -232,6 +241,20 @@ export async function main() {
       }
       proyecto.funcion = f;
       console.log(`    ↳ funcion: ${f.estado}${f.paso_fallo ? ` (falla en "${f.paso_fallo}": ${f.motivo})` : ''}`);
+    }
+
+    // Vencimiento del certificado TLS (best-effort): para cualquier pull https que responda,
+    // leer cuantos dias faltan para que venza el cert. Sirve para avisar ANTES de que caduque
+    // (un cert vencido tira el servicio). Si falla, `tls` queda sin setear.
+    if (t.tipo === 'pull' && ['OK', 'LENTO', 'DESPERTANDO'].includes(r.estado)) {
+      const host = hostHttps(t.url);
+      if (host) {
+        const cert = await obtenerCertificado(host, { ahora });
+        if (cert) {
+          proyecto.tls = cert;
+          console.log(`    ↳ cert: vence en ${cert.dias_para_vencer} d (${cert.valido_hasta})`);
+        }
+      }
     }
     proyectos.push(proyecto);
 
@@ -279,7 +302,7 @@ export async function main() {
   // se llamara automaticamente aca, despues de escribir status.json, sin tocar este archivo.
   try {
     const { notify } = await import('./notify.js');
-    await notify({ nuevo, anterior, dryRun: process.env.DRY_RUN === '1' });
+    await notify({ nuevo, anterior, history, dryRun: process.env.DRY_RUN === '1' });
   } catch (err) {
     if (err?.code !== 'ERR_MODULE_NOT_FOUND') {
       console.error('notify.js fallo:', err?.message ?? err);

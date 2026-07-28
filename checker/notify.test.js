@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { detectarEventos, construirEmail, notify } from './notify.js';
+import { detectarEventos, construirEmail, notify, severidadEvento } from './notify.js';
 
 const HORA = 3600_000;
 const T0 = Date.parse('2026-06-04T12:00:00.000Z');
@@ -126,6 +126,103 @@ test('detectarEventos: FUNCION_OMITIDA no genera eventos', () => {
   assert.equal(eventos.length, 0);
 });
 
+// ── detectarEventos: avisos blandos (cert por vencer, lento sostenido) ─────────
+
+test('detectarEventos: cert por vencer (<= umbral) dispara aviso y registra cooldown', () => {
+  const nuevo = status([proy('A', 'OK', { tls: { dias_para_vencer: 10, valido_hasta: '2026-06-14' } })]);
+  const { eventos, alertasEstado } = detectarEventos(nuevo, null, {}, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'cert_por_vencer');
+  assert.ok(alertasEstado['cert:A'], 'usa clave de cooldown cert:<nombre>');
+});
+
+test('detectarEventos: cert por vencer respeta el cooldown diario', () => {
+  const nuevo = status([proy('A', 'OK', { tls: { dias_para_vencer: 10 } })]);
+  const registro = { 'cert:A': new Date(T0 - 5 * HORA).toISOString() }; // aviso hace 5h (< 24h)
+  const { eventos } = detectarEventos(nuevo, null, registro, { ahora: T0 });
+  assert.equal(eventos.length, 0);
+});
+
+test('detectarEventos: cert con margen (> umbral) no avisa y limpia el registro', () => {
+  const nuevo = status([proy('A', 'OK', { tls: { dias_para_vencer: 60 } })]);
+  const registro = { 'cert:A': new Date(T0 - 48 * HORA).toISOString() };
+  const { eventos, alertasEstado } = detectarEventos(nuevo, null, registro, { ahora: T0 });
+  assert.equal(eventos.length, 0);
+  assert.equal(alertasEstado['cert:A'], undefined);
+});
+
+test('detectarEventos: LENTO sostenido (continuo >= umbral) dispara aviso', () => {
+  const desde = new Date(T0 - 60 * 60_000).toISOString(); // LENTO desde hace 60 min
+  const nuevo = status([proy('A', 'LENTO', { desde, latencia_ms: 4000 })]);
+  const anterior = status([proy('A', 'LENTO', { desde })]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'lento_sostenido');
+});
+
+test('detectarEventos: LENTO recien empezado NO dispara lento_sostenido', () => {
+  const nuevo = status([proy('A', 'LENTO')]); // desde = T0 (ahora) -> continuo 0
+  const anterior = status([proy('A', 'OK')]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos.length, 0);
+});
+
+// ── detectarEventos: alertas avanzadas (severidad, escalamiento, flapping, mantenimiento) ──
+
+test('detectarEventos: caida de servicio critico -> severidad CRITICO', () => {
+  const anterior = status([proy('A', 'OK', { critico: true })]);
+  const nuevo = status([proy('A', 'CAIDO', { critico: true })]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos[0].tipo, 'caida');
+  assert.equal(eventos[0].severidad, 'CRITICO');
+});
+
+test('detectarEventos: critico caido hace rato con cooldown vencido -> escalado', () => {
+  const desde = new Date(T0 - 2 * HORA).toISOString(); // caido hace 2h (> umbral escalar 1h)
+  const anterior = status([proy('A', 'CAIDO', { critico: true, desde })]);
+  const nuevo = status([proy('A', 'CAIDO', { critico: true, desde })]);
+  const registro = { A: new Date(T0 - 45 * 60_000).toISOString() }; // aviso hace 45 min (> 30 min)
+  const { eventos } = detectarEventos(nuevo, anterior, registro, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'escalado');
+  assert.equal(eventos[0].severidad, 'CRITICO');
+});
+
+test('detectarEventos: critico usa cooldown corto (recordatorio a los 45 min, aun sin escalar)', () => {
+  const desde = new Date(T0 - 40 * 60_000).toISOString(); // caido hace 40 min (< 1h: no escala)
+  const anterior = status([proy('A', 'CAIDO', { critico: true, desde })]);
+  const nuevo = status([proy('A', 'CAIDO', { critico: true, desde })]);
+  const registro = { A: new Date(T0 - 45 * 60_000).toISOString() };
+  const { eventos } = detectarEventos(nuevo, anterior, registro, { ahora: T0 });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'recordatorio');
+});
+
+test('detectarEventos: flapping suprime la caida y emite un solo aviso de inestable', () => {
+  const evs = [5, 15, 25, 35, 45].map((m) => ({ nombre: 'A', estado: 'CAIDO', timestamp: new Date(T0 - m * 60_000).toISOString() }));
+  const history = { eventos: evs };
+  const anterior = status([proy('A', 'OK')]);
+  const nuevo = status([proy('A', 'CAIDO')]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0, history });
+  assert.equal(eventos.length, 1);
+  assert.equal(eventos[0].tipo, 'flapping');
+});
+
+test('detectarEventos: proyecto en mantenimiento no genera alertas', () => {
+  const anterior = status([proy('A', 'OK')]);
+  const nuevo = status([proy('A', 'CAIDO', { mantenimiento: true })]);
+  const { eventos } = detectarEventos(nuevo, anterior, {}, { ahora: T0 });
+  assert.equal(eventos.length, 0);
+});
+
+test('severidadEvento: clasifica CRITICO / AVISO / INFO', () => {
+  assert.equal(severidadEvento('caida', { critico: true }), 'CRITICO');
+  assert.equal(severidadEvento('escalado', { critico: true }), 'CRITICO');
+  assert.equal(severidadEvento('caida', {}), 'AVISO');
+  assert.equal(severidadEvento('cert_por_vencer', { critico: true }), 'AVISO');
+  assert.equal(severidadEvento('recuperado', { critico: true }), 'INFO');
+});
+
 // ── construirEmail ────────────────────────────────────────────────────────────
 
 test('construirEmail: el asunto resume caidos y recuperados', () => {
@@ -152,6 +249,22 @@ test('construirEmail: evento funcional muestra el paso y el motivo de la falla',
   assert.match(cuerpo, /FUNCIÓN FALLA — Cubiertas/);
   assert.match(cuerpo, /falló en "consulta"/);
   assert.match(cuerpo, /sugerido/);
+});
+
+test('construirEmail: resume avisos (cert/lento) en el asunto y el cuerpo', () => {
+  const eventos = [
+    { tipo: 'cert_por_vencer', proyecto: proy('A', 'OK', { tls: { dias_para_vencer: 7, valido_hasta: '2026-06-11' } }) },
+  ];
+  const { asunto, cuerpo } = construirEmail(eventos);
+  assert.match(asunto, /1 aviso/);
+  assert.match(cuerpo, /CERT POR VENCER — A/);
+  assert.match(cuerpo, /vence en 7 día/);
+});
+
+test('construirEmail: un evento CRÍTICO agrega el prefijo al asunto', () => {
+  const eventos = [{ tipo: 'caida', severidad: 'CRITICO', proyecto: proy('ERP', 'CAIDO', { critico: true }) }];
+  const { asunto } = construirEmail(eventos);
+  assert.match(asunto, /🚨 CRÍTICO/);
 });
 
 // ── notify (dry-run, no persiste ni envia) ────────────────────────────────────

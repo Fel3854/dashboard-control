@@ -1,0 +1,80 @@
+name: Canario de alertas
+
+# Manda una alerta de PRUEBA una vez por semana para confirmar que los canales (email y
+# Telegram) siguen vivos, SIN esperar a una caida real. Reusa el path `TEST_ALERTA=1` de
+# checker/notify.js. Si ningun canal entrega, el run queda en rojo (visible en Actions).
+# Complementa el boton manual "test_alerta" del workflow principal (verificacion on-demand).
+on:
+  schedule:
+    - cron: '0 12 * * 1' # lunes 12:00 UTC (~09:00 ART)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canario:
+    runs-on: ubuntu-latest
+    env:
+      MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # Con TEST_ALERTA=1, notify.js arma una alerta de prueba y deja los outputs
+      # `alerta=true` + `asunto` (no persiste nada). status.json generado es efimero (no se
+      # commitea: este workflow es contents:read).
+      - name: Generar alerta de prueba
+        id: checker
+        env:
+          TEST_ALERTA: '1'
+        run: node checker/check.js
+
+      - name: Enviar alerta por email
+        id: email
+        if: always() && steps.checker.outputs.alerta == 'true' && env.MAIL_SERVER != ''
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ steps.checker.outputs.asunto }}
+          to: ${{ secrets.MAIL_TO }}
+          from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
+          body: file://alerta-cuerpo.txt
+
+      - name: Enviar alerta por Telegram
+        id: telegram
+        if: always() && steps.checker.outputs.alerta == 'true' && env.TELEGRAM_BOT_TOKEN != ''
+        continue-on-error: true
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ASUNTO: ${{ steps.checker.outputs.asunto }}
+        run: |
+          { printf '%s\n\n' "$ASUNTO"; cat alerta-cuerpo.txt; } > telegram-msg.txt
+          curl -sS --fail \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text@telegram-msg.txt" \
+            --data "disable_web_page_preview=true"
+
+      # Si el canario no pudo entregar por NINGUN canal, el run queda en rojo: es justamente
+      # la senal de que las alertas reales tampoco llegarian.
+      - name: Verificar entrega
+        if: always()
+        run: |
+          email='${{ steps.email.outcome }}'
+          tg='${{ steps.telegram.outcome }}'
+          if [ "$email" != "success" ] && [ "$tg" != "success" ]; then
+            echo "::error::El canario no entrego la alerta de prueba por ningun canal (email=$email, telegram=$tg)."
+            exit 1
+          fi
+          echo "Canario entregado (email=$email, telegram=$tg)."
