@@ -44,6 +44,11 @@ jobs:
     env:
       MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      # Dead-man switch externo (opcional): URL de un check en healthchecks.io. Si esta vacio,
+      # los pings se saltean (el sistema funciona igual, sin el aviso externo).
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+      # Destinatario extra para alertas CRITICAS (opcional): escalamiento a mas gente/guardia.
+      MAIL_TO_CRITICO: ${{ secrets.MAIL_TO_CRITICO }}
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url || steps.deploy2.outputs.page_url }}
@@ -55,6 +60,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24' # LTS; Node 20 llego a EOL (el codigo pide >=20, compatible)
+
+      # Corre los tests (node --test) ANTES de commitear/deployar. Solo en push/dispatch
+      # (cambios de codigo): NO en el cron cada 10 min, para no meter ruido en el loop de
+      # monitoreo. Si un test falla, el job corta aca y no se deploya un checker roto.
+      - name: Correr tests
+        if: github.event_name != 'schedule'
+        run: npm test
 
       # Lee public/status.json previo (del checkout), escribe el nuevo y, via el hook,
       # corre notify.js: si hubo transicion, deja los outputs `alerta`/`asunto`.
@@ -128,6 +140,7 @@ jobs:
       # Fase 2: envia el email SOLO si notify.js marco una alerta y hay SMTP configurado.
       # Va al final para no bloquear el deploy si fallara el envio.
       - name: Enviar alerta por email
+        id: email
         # always(): que la alerta salga aunque el deploy de Pages haya fallado (si fallo el
         # CHECKER, `alerta` queda vacio y este step se saltea igual, asi que no hay riesgo).
         if: always() && steps.checker.outputs.alerta == 'true' && env.MAIL_SERVER != ''
@@ -143,10 +156,28 @@ jobs:
           from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
           body: file://alerta-cuerpo.txt
 
+      # Escalamiento: si la alerta es CRITICA (servicio critico caido) y hay una lista de
+      # escalamiento configurada, mandar TAMBIEN a esos destinatarios (guardia / mas gente).
+      - name: Escalar alerta CRITICA por email
+        id: email_critico
+        if: always() && steps.checker.outputs.alerta == 'true' && steps.checker.outputs.severidad == 'CRITICO' && env.MAIL_SERVER != '' && env.MAIL_TO_CRITICO != ''
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ steps.checker.outputs.asunto }}
+          to: ${{ secrets.MAIL_TO_CRITICO }}
+          from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
+          body: file://alerta-cuerpo.txt
+
       # Alerta por Telegram (opcional): reusa el mismo cuerpo que arma notify.js. Se activa
       # solo si TELEGRAM_BOT_TOKEN esta configurado. Crear el bot con @BotFather y obtener el
       # chat_id (ver README). No usa Action externa: un curl a la Bot API alcanza.
       - name: Enviar alerta por Telegram
+        id: telegram
         if: always() && steps.checker.outputs.alerta == 'true' && env.TELEGRAM_BOT_TOKEN != ''
         continue-on-error: true # idem: si Telegram falla, el deploy igual queda verde
         env:
@@ -159,3 +190,34 @@ jobs:
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "text@telegram-msg.txt" \
             --data "disable_web_page_preview=true"
+
+      # "Quien vigila al vigilante": si HABIA una alerta para mandar pero NINGUN canal la
+      # entrego (SMTP roto, Telegram caido, o ambos sin configurar), no dejar el run en verde
+      # en silencio. Lo marcamos en rojo (visible en Actions) y, si esta el dead-man switch,
+      # lo pinchamos con /fail para que healthchecks.io avise por afuera. Un step salteado
+      # (canal no configurado) tiene outcome 'skipped', que tampoco cuenta como entregado.
+      - name: Verificar entrega de alerta
+        if: always() && steps.checker.outputs.alerta == 'true'
+        run: |
+          email='${{ steps.email.outcome }}'
+          tg='${{ steps.telegram.outcome }}'
+          if [ "$email" != "success" ] && [ "$tg" != "success" ]; then
+            echo "::error::Habia una alerta para enviar pero ningun canal la entrego (email=$email, telegram=$tg)."
+            if [ -n "$HEALTHCHECK_URL" ]; then curl -fsS -m 10 "${HEALTHCHECK_URL}/fail" || true; fi
+            exit 1
+          fi
+          echo "Alerta entregada (email=$email, telegram=$tg)."
+
+      # Dead-man switch: avisa por AFUERA de GitHub si el checker deja de correr. Al final de
+      # cada corrida pinguea healthchecks.io: OK si el checker corrio, /fail si fallo. Si GitHub
+      # deja de disparar el cron (o Actions se cae), healthchecks.io no recibe el ping dentro de
+      # su ventana y manda la alerta el solo -> detecta "el monitor mismo se murio". Se activa
+      # solo si HEALTHCHECK_URL esta configurado.
+      - name: Dead-man switch (healthchecks.io)
+        if: always() && env.HEALTHCHECK_URL != ''
+        run: |
+          if [ "${{ steps.checker.outcome }}" = "success" ]; then
+            curl -fsS -m 10 "$HEALTHCHECK_URL" || true
+          else
+            curl -fsS -m 10 "${HEALTHCHECK_URL}/fail" || true
+          fi

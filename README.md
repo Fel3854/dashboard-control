@@ -5,6 +5,9 @@ sanos**. Un checker pinguea cada servicio cada 10 min (vía GitHub Actions), cal
 estado + latencia y escribe `public/status.json`; el panel estático (GitHub Pages) lo
 muestra con semáforos 🟢🟡🔴.
 
+> ¿Cómo se lee el panel y qué significa cada color/medición? → **[`GUIA.md`](GUIA.md)**
+> (guía operativa + técnica). Este README cubre la instalación y configuración.
+
 > Fuente de verdad del diseño: [`DESIGN.md`](DESIGN.md). **Fase 1** (checker + estado +
 > panel), **Fase 2** (alertas por email) y **Fase 3** (heartbeat + historial + uptime) ya
 > están en producción. Sumado: detalle por proyecto, botón de chequeo manual y alertas por
@@ -347,3 +350,49 @@ así que revisá el log del step "Enviar alerta por email". El error típico de 
 Significa que el **App Password venció/se revocó**. Generá uno nuevo en
 https://myaccount.google.com/apppasswords (requiere 2FA) y actualizá el secret `MAIL_PASSWORD`.
 Después verificá con el `test_alerta` de arriba.
+
+## Control avanzado (fase 4)
+
+Mejoras para llevar el monitoreo al máximo, sin agregar infraestructura ni dependencias.
+
+### Confiabilidad del propio monitor ("que no muera en silencio")
+
+- **Tests en CI:** el workflow corre `node --test` antes de deployar (solo en push/dispatch, no
+  en el cron), así una regresión en la lógica de estado/alertas no llega a producción.
+- **Aviso de datos viejos:** si el `status.json` queda > 30 min sin actualizarse (el checker
+  dejó de correr), el panel muestra un banner rojo de "datos desactualizados".
+- **Dead-man switch (opcional):** configurá el secret `HEALTHCHECK_URL` (un check gratis en
+  [healthchecks.io](https://healthchecks.io), período ~15 min). El workflow lo pinguea al final;
+  si GitHub deja de correr el cron, healthchecks.io te avisa **desde afuera**.
+- **Verificación de entrega:** si había una alerta para mandar y **ningún** canal la entregó
+  (SMTP roto, etc.), el run queda en **rojo** (y pinguea `HEALTHCHECK_URL/fail`). Además hay un
+  **canario semanal** (`canary-alertas.yml`) que manda una alerta de prueba para confirmar canales.
+
+### Más cobertura de checks
+
+- **Vencimiento de certificado TLS:** para cada servicio `https` se lee cuántos días le quedan al
+  cert y se avisa cuando faltan ≤ 21 días (configurable con `CERT_AVISO_DIAS`). Se ve en el detalle
+  del proyecto.
+- **Latencia sostenida:** `LENTO` no alerta al toque (rebota), pero si un servicio sigue lento de
+  forma continua ≥ 45 min, manda un aviso (cooldown 12 h).
+
+### Alertas avanzadas
+
+- **Severidad:** un servicio marcado crítico que se cae genera una alerta **CRÍTICA** (prefijo
+  `[🚨 CRÍTICO]` en el asunto). Marcá críticos con `"critico": true` en `proyectos.json`; una
+  dependencia (`es_dependencia`) ya es crítica por defecto (ej. ERP).
+- **Escalamiento:** los críticos recuerdan cada 30 min (vs 6 h) y, si siguen caídos > 1 h, escalan
+  (asunto más urgente). Con el secret `MAIL_TO_CRITICO` esas alertas van también a una lista de
+  guardia extra.
+- **Flapping:** si un servicio rebota de estado muchas veces en poco tiempo (≥ 4 en 1 h), en vez de
+  spamear un aviso por rebote se manda **uno solo** de "inestable".
+- **Ventanas de mantenimiento:** editá `mantenimiento.json` (ver `mantenimiento.example.json`) con
+  `[{ "nombre": "ERP Masterbus"|"*", "desde": ISO, "hasta": ISO, "motivo": "…" }]`. Durante la
+  ventana el estado se registra igual, pero **no se alerta** (y el panel muestra 🛠).
+
+### Secrets nuevos (todos opcionales)
+
+| Secret | Para qué |
+|---|---|
+| `HEALTHCHECK_URL` | Dead-man switch externo (healthchecks.io) |
+| `MAIL_TO_CRITICO` | Destinatarios extra para alertas CRÍTICAS (escalamiento) |

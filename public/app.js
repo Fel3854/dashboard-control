@@ -4,6 +4,10 @@
 
 const REFRESH_MS = 60_000;
 
+// Si el status.json quedo mas viejo que esto, el panel avisa que el monitor podria estar
+// caido (el checker corre cada ~10 min; 30 min = varias corridas perdidas seguidas).
+const MAX_EDAD_OK_MS = 30 * 60_000;
+
 // Repo para el boton "Forzar chequeo" (abre la pagina de Actions: un panel estatico
 // publico no puede guardar un token de escritura, asi que el disparo es manual desde ahi).
 const REPO = 'Fel3854/dashboard-control';
@@ -155,6 +159,11 @@ function detalleHTML(p) {
   } else {
     datos.push(['Latencia', p.latencia_ms != null ? `${p.latencia_ms} ms` : '—']);
     datos.push(['HTTP', p.http_code != null ? p.http_code : '—']);
+    if (p.tls && p.tls.dias_para_vencer != null) {
+      const d = p.tls.dias_para_vencer;
+      const alerta = d <= 21 ? '⚠️ ' : '';
+      datos.push(['Certificado TLS', `${alerta}vence en ${d} día${d === 1 ? '' : 's'}`]);
+    }
   }
   datos.push(['Plataforma', p.plataforma ?? '—']);
   datos.push(['En este estado desde', p.desde ? `${horaLocal(p.desde)} (${hace(p.desde)})` : '—']);
@@ -218,6 +227,12 @@ function filaHTML(p, ventanaDias) {
     lineaDesde = `<div class="desde ${info.clase}">${VERBO[p.estado] ?? p.estado} ${hace(p.desde)}</div>`;
   }
 
+  // Badges (derivados de status.json): mantenimiento silencia alertas; critico escala mas rapido.
+  const badges = [];
+  if (p.mantenimiento) badges.push('<span class="badge badge-mant" title="En ventana de mantenimiento: alertas silenciadas">🛠 mantenimiento</span>');
+  if (p.critico) badges.push('<span class="badge badge-crit" title="Servicio crítico: escala más rápido en las alertas">🚨 crítico</span>');
+  const badgesHTML = badges.length ? `<div class="badges">${badges.join('')}</div>` : '';
+
   const idDetalle = `detalle-${slugId(p.nombre)}`;
   return `
     <div class="item ${info.clase} ${abierto ? 'abierto' : ''}" role="listitem">
@@ -227,6 +242,7 @@ function filaHTML(p, ventanaDias) {
           <div class="nombre">${escapar(p.nombre)}</div>
           <div class="plataforma">${escapar(p.plataforma ?? '')}${esHeartbeat ? ' · heartbeat' : ''}</div>
           ${lineaDesde}
+          ${badgesHTML}
         </div>
         <div class="metricas">
           <span class="estado-label ${info.clase}">${info.label}</span>
@@ -266,6 +282,19 @@ function render(data) {
 
   $('#ultimo-check').textContent = `Último check: ${horaLocal(data.timestamp)} (${hace(data.timestamp)})`;
   $('#resumen').textContent = resumen(proyectos);
+
+  // Aviso de "datos viejos": si el checker dejo de reportar, no mostrar el estado de abajo
+  // como si fuera actual (el monitor mismo podria estar caido).
+  const banner = $('#banner-frescura');
+  if (banner) {
+    const edadMs = Date.now() - new Date(data.timestamp).getTime();
+    if (Number.isFinite(edadMs) && edadMs > MAX_EDAD_OK_MS) {
+      banner.textContent = `⚠️ Datos posiblemente desactualizados — el último check fue ${hace(data.timestamp)} (el checker corre cada ~10 min). El monitor podría estar caído; el estado de abajo puede no ser el actual.`;
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+    }
+  }
 
   if (proyectos.length === 0) {
     panel.innerHTML = '<div class="vacio">No hay proyectos monitoreados todavía. Completá <code>proyectos.json</code>.</div>';

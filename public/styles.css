@@ -61,6 +61,47 @@ body {
   padding: 0 16px;
 }
 
+/* Banner de frescura: aparece si el status.json quedo viejo (el checker dejo de reportar
+   -> el monitor podria estar caido y el estado de abajo no ser el actual). */
+.banner-frescura {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: #fdecea;
+  border: 1px solid var(--rojo);
+  border-left: 5px solid var(--rojo);
+  border-radius: var(--radius);
+  color: #7a1c11;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* Badges de fila: mantenimiento (alertas silenciadas) y critico (escala mas rapido). */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.badge {
+  font-size: 0.68rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  color: var(--suave);
+  background: #f4f4f4;
+  white-space: nowrap;
+}
+.badge-crit {
+  color: var(--rojo);
+  border-color: var(--rojo);
+  background: #fdecea;
+}
+.badge-mant {
+  color: #7a5b00;
+  border-color: var(--amarillo);
+  background: #fff7e0;
+}
+
 .meta-check {
   display: flex;
   justify-content: space-between;

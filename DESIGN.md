@@ -17,7 +17,7 @@ Panel de control central para ver de un vistazo si **todos los proyectos del eco
 |---|---|---|---|
 | Consultas BD Mantenimiento | Render | `GET /health` + `/api/flota` | Render **duerme ~15 min** → reintentos, no marcar caído en cold start |
 | Controles Stock Telegram | Cloud Run | `GET /health` | cold start posible |
-| Sistema Compras | Railway | `GET /health` (agregar endpoint) | siempre on |
+| ~~Sistema Compras~~ | Railway | — | **Retirado (2026-07):** salió del ecosistema, ya no se monitorea |
 | Sistema Cubiertas | Vercel | `GET /` (home/login) | serverless |
 | **ERP Masterbus** (dependencia) | MySQL + web | `GET` a `mantenimiento.masterbus.net` | punto único de falla de 3 proyectos |
 | Rotación | Streamlit **local** | *heartbeat* (Fase 3) | no pingueable: reporta "última corrida" |
@@ -61,7 +61,6 @@ dashboard-control/
   { "nombre": "Sistema Cubiertas", "tipo": "pull", "url": "https://<cubiertas>.vercel.app/", "plataforma": "Vercel" },
   { "nombre": "Consultas BD Mantenimiento", "tipo": "pull", "url": "https://<backend>.onrender.com/health", "plataforma": "Render", "tolera_cold_start": true },
   { "nombre": "Controles Stock Telegram", "tipo": "pull", "url": "https://<service>.run.app/health", "plataforma": "Cloud Run", "tolera_cold_start": true },
-  { "nombre": "Sistema Compras", "tipo": "pull", "url": "https://<compras>.up.railway.app/health", "plataforma": "Railway" },
   { "nombre": "ERP Masterbus", "tipo": "pull", "url": "https://mantenimiento.masterbus.net/", "plataforma": "propio", "es_dependencia": true },
   { "nombre": "Rotación", "tipo": "heartbeat", "max_silencio_horas": 26, "plataforma": "local" }
 ]
@@ -82,7 +81,7 @@ dashboard-control/
 
 ## Orden de desarrollo (fases)
 
-1. **Checker + estado + panel** — `check.js` pinguea los pull-targets (Cubiertas, Compras, Consultas, Controles Stock, ERP), escribe `status.json`; `index.html` lo muestra. Deploy en GitHub Pages.
+1. **Checker + estado + panel** — `check.js` pinguea los pull-targets (Cubiertas, Consultas, Controles Stock, ERP), escribe `status.json`; `index.html` lo muestra. Deploy en GitHub Pages.
 2. **Alertas por email** — `notify.js` manda email en transición OK→caído, con cooldown. SMTP en GitHub Secrets.
 3. **Heartbeat para Rotación / batch** + historial (`history.json`) y % de uptime.
 4. *(opcional)* "Check now" manual vía `workflow_dispatch`; vista de histórico.
@@ -107,7 +106,7 @@ dashboard-control/
 
 ## Supuestos / pendientes
 
-- **Cada proyecto web debería exponer `GET /health`** que valide su propia BD. Consultas ya lo tiene; a Compras/Cubiertas hay que agregarlo. → **patrón nuevo a estandarizar e ingestar en la bóveda como concepto «Health endpoint estándar».**
+- **Cada proyecto web debería exponer `GET /health`** que valide su propia BD. Consultas ya lo tiene; a Cubiertas hay que agregarlo. → **patrón nuevo a estandarizar e ingestar en la bóveda como concepto «Health endpoint estándar».**
 - Cron de Actions: mínimo 5 min y puede demorarse bajo carga (aceptable para esto).
 - **Seguridad:** si el panel (GitHub Pages) es público, `status.json` **no** debe exponer URLs internas sensibles ni credenciales. Evaluar repo privado + Pages con acceso, o un panel sin datos sensibles.
 - Completar las URLs reales de cada deploy en `proyectos.json`.

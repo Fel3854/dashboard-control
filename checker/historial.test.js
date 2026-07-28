@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { detectarTransiciones, calcularUptime, podarHistorial } from './historial.js';
+import { detectarTransiciones, calcularUptime, podarHistorial, esFlapping } from './historial.js';
 
 const DIA = 24 * 3600_000;
 const T0 = Date.parse('2026-06-04T12:00:00.000Z');
@@ -83,4 +83,29 @@ test('podarHistorial: descarta lo viejo pero conserva un ancla por proyecto', ()
   assert.equal(poda.length, 2);
   assert.equal(poda[0].timestamp, haceDias(120));
   assert.equal(poda[1].timestamp, haceDias(10));
+});
+
+// ── esFlapping ─────────────────────────────────────────────────────────────────
+
+const MIN = 60_000;
+const haceMin = (m) => new Date(T0 - m * MIN).toISOString();
+
+test('esFlapping: muchas transiciones en la ventana -> true', () => {
+  const evs = [5, 15, 25, 35, 45].map((m) => ({ timestamp: haceMin(m) })); // 5 en 60 min
+  assert.equal(esFlapping(evs, { ahora: T0, ventanaMin: 60, maxTransiciones: 4 }), true);
+});
+
+test('esFlapping: pocas transiciones -> false', () => {
+  const evs = [10, 40].map((m) => ({ timestamp: haceMin(m) }));
+  assert.equal(esFlapping(evs, { ahora: T0, ventanaMin: 60, maxTransiciones: 4 }), false);
+});
+
+test('esFlapping: transiciones viejas fuera de la ventana no cuentan', () => {
+  const evs = [0, 1, 2, 3].map((d) => ({ timestamp: haceDias(d + 1) })); // todas hace >= 1 dia
+  assert.equal(esFlapping(evs, { ahora: T0, ventanaMin: 60, maxTransiciones: 4 }), false);
+});
+
+test('esFlapping: lista vacia o ausente -> false', () => {
+  assert.equal(esFlapping([], { ahora: T0 }), false);
+  assert.equal(esFlapping(undefined, { ahora: T0 }), false);
 });
