@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar, esTransitorio, extraerValor } from './funcion.js';
+import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar, esTransitorio, extraerValor, mensajeError } from './funcion.js';
 
 const noopSleep = async () => {}; // anula el backoff de reintentos en los tests
 
@@ -62,6 +62,27 @@ test('cumpleEspera: status fuera de la lista -> falla con motivo', () => {
   const r = cumpleEspera({ status: 200 }, { status: 401, json: null });
   assert.equal(r.ok, false);
   assert.match(r.motivo, /401/);
+});
+
+test('cumpleEspera: status inesperado con error_description en el body -> el motivo lo incluye', () => {
+  const r = cumpleEspera({ status: 200 }, { status: 400, json: { error_description: 'Invalid login credentials' } });
+  assert.equal(r.ok, false);
+  assert.match(r.motivo, /status 400 \(esperaba 200\): Invalid login credentials/);
+});
+
+test('cumpleEspera: status inesperado sin body JSON -> motivo queda como antes (compat)', () => {
+  const r = cumpleEspera({ status: 200 }, { status: 400, json: null });
+  assert.equal(r.ok, false);
+  assert.equal(r.motivo, 'status 400 (esperaba 200)');
+});
+
+test('mensajeError: toma el 1er campo de error legible; recorta a 120; null si no hay', () => {
+  assert.equal(mensajeError({ error_description: 'Invalid login credentials' }), 'Invalid login credentials');
+  assert.equal(mensajeError({ msg: 'Email not confirmed' }), 'Email not confirmed');
+  assert.equal(mensajeError({ message: 'Unauthenticated.' }), 'Unauthenticated.');
+  assert.equal(mensajeError({ error_description: 'X'.repeat(200) }).length, 120);
+  assert.equal(mensajeError({ otro: 'campo' }), null);
+  assert.equal(mensajeError(null), null);
 });
 
 test('cumpleEspera: falta el campo JSON esperado -> falla', () => {

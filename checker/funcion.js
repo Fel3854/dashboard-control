@@ -59,6 +59,25 @@ export function extraerValor(texto, regex) {
   }
 }
 
+/**
+ * Extrae un mensaje de error LEGIBLE del cuerpo JSON de una respuesta fallida, para anexarlo al
+ * motivo y hacer el diagnostico autoexplicativo (ej. un 400 de Supabase pasa de "status 400" a
+ * "status 400: Invalid login credentials"). Prueba los campos que usan las APIs mas comunes:
+ * Supabase/GoTrue (`error_description`, `msg`), Laravel/genericas (`message`, `error`). Devuelve el
+ * primero que sea un string no vacio, recortado; null si el body no es objeto o no trae ninguno.
+ */
+export function mensajeError(json) {
+  if (!json || typeof json !== 'object') return null;
+  for (const clave of ['error_description', 'msg', 'message', 'error']) {
+    const v = json[clave];
+    if (typeof v === 'string' && v.trim()) {
+      const limpio = v.trim();
+      return limpio.length > 120 ? `${limpio.slice(0, 117)}...` : limpio;
+    }
+  }
+  return null;
+}
+
 // ── Aserciones (PURA — sin red) ───────────────────────────────────────────────
 
 /**
@@ -84,7 +103,11 @@ export function cumpleEspera(espera = {}, resultado) {
   if (espera.status != null) {
     const aceptados = Array.isArray(espera.status) ? espera.status : [espera.status];
     if (!aceptados.includes(resultado.status)) {
-      return { ok: false, motivo: `status ${resultado.status ?? '-'} (esperaba ${aceptados.join('/')})` };
+      // Si el cuerpo trae un mensaje de error (ej. Supabase "Invalid login credentials"), se anexa
+      // para que el motivo diga QUE fallo, no solo el codigo. Sin body util, queda como antes.
+      const detalle = mensajeError(resultado.json);
+      const base = `status ${resultado.status ?? '-'} (esperaba ${aceptados.join('/')})`;
+      return { ok: false, motivo: detalle ? `${base}: ${detalle}` : base };
     }
   }
 
