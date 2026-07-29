@@ -17,6 +17,7 @@ import { obtenerSalud } from './salud.js';
 import { ejecutarFuncion } from './funcion.js';
 import { obtenerCertificado, hostHttps } from './tls.js';
 import { enMantenimiento, leerVentanas } from './mantenimiento.js';
+import { renderGuia } from './guia.js';
 
 const UPTIME_VENTANA_DIAS = 30; // ventana principal que muestra la fila
 const UPTIME_VENTANAS = [7, 30, 90]; // ventanas extra para el detalle por proyecto
@@ -296,6 +297,15 @@ export async function main() {
   console.log(
     `\n✓ status.json (${proyectos.length} proyecto/s) y history.json (${history.eventos.length} evento/s) escritos.`,
   );
+
+  // Publicar el manual: renderizar GUIA.md -> public/guia.html (fuente unica; el .md es lo
+  // editable). Best-effort: si GUIA.md no existe, se omite y no rompe el checker.
+  try {
+    const guiaMd = await readFile(resolve(RAIZ, 'GUIA.md'), 'utf8');
+    await writeFile(resolve(dirname(statusPath), 'guia.html'), renderGuia(guiaMd), 'utf8');
+  } catch {
+    /* sin GUIA.md: no se publica el manual */
+  }
 
   // ── Hook Fase 2 (alertas por email) ─────────────────────────────────────────
   // notify.js todavia NO existe en Fase 1. Cuando se cree (exportando `notify`),
