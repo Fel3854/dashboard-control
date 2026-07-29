@@ -140,13 +140,46 @@ Si el proyecto tiene `salud_json: true` y el ping salió OK/LENTO/DESPERTANDO, e
   `uptime_s`, `commit`); todo lo demás se descarta y los textos se recortan. Nunca expone tokens ni
   connection strings aunque el endpoint los devuelva.
 
-## Certificado TLS (proyectos `https`)
+## Certificado TLS / HTTPS (proyectos `https`)
 
-Para cada proyecto `https` que responde, el checker abre una conexión TLS y lee **cuántos días le quedan al
-certificado**. Se ve en el detalle (*"Certificado TLS: vence en 60 días"*) y, si quedan **≤ 21 días**
-(configurable con `CERT_AVISO_DIAS`), dispara un **aviso** por email/Telegram. Best-effort: si no se puede
-leer, no muestra nada y no rompe el checker. (`[checker/tls.js](checker/tls.js)`.) Sirve para renovar
-**antes** de que venza — un cert vencido tira el servicio entero, y suele pasar por olvido.
+El certificado HTTPS es lo que hace andar el **candado** del navegador: cifra el tráfico y prueba que el
+dominio es legítimo. Tiene **fecha de vencimiento** (Let's Encrypt dura 90 días; otros emisores, 1 año) y hay
+que **renovarlo** antes de esa fecha. La renovación suele ser automática… hasta que un día no lo es.
+
+### Qué pasa si vence (y por qué avisamos con anticipación)
+
+Un certificado vencido **no es un aviso amarillo: es una caída total**, y por partida triple:
+
+- **Los usuarios quedan afuera.** El navegador **bloquea** el sitio con una pantalla de error roja
+  (*"Tu conexión no es privada"* / `NET::ERR_CERT_DATE_INVALID`) — no pueden entrar aunque el servidor esté
+  perfecto por detrás.
+- **Se rompen las integraciones.** Las apps y APIs que consumen el servicio **cortan la conexión** (fallan
+  todos los pedidos HTTPS), aunque el backend funcione bien.
+- **En el dashboard se ve 🔴 CAÍDO.** El propio ping falla, porque rechaza la conexión TLS inválida. O sea:
+  cuando ya lo ves en rojo, el daño ya está hecho.
+
+Por eso el checker no espera a que caduque. Para cada proyecto `https` que responde, abre una conexión TLS
+aparte y lee **cuántos días le quedan** al certificado — lo ves en el detalle (*"Certificado TLS: vence en 60
+días"*). Cuando quedan **≤ 21 días** (configurable con `CERT_AVISO_DIAS`), manda un **aviso** anticipado
+(severidad AVISO, como mucho **1 vez por día**). Es la diferencia entre **renovar tranquilo un martes** y
+tener **todo caído un domingo a la madrugada**.
+
+```
+   hoy ─────────────────────────────▶ vencimiento
+        ✅ todo normal   │  🟡 aviso   │  🔴 CAÍDO
+                     ≤ 21 días        día 0
+                    "vence en N d"   sitio bloqueado
+```
+
+Es **best-effort**: solo lee la fecha del cert (no valida la cadena; de eso ya se encarga el ping); si no se
+puede leer, no muestra nada y no rompe el checker. (`[checker/tls.js](checker/tls.js)`.)
+
+### Cómo se renueva
+
+- **Plataformas gestionadas** (Vercel, Render, Cloud Run): renuevan solas, no hay que hacer nada.
+- **Let's Encrypt propio** (`certbot`): se auto-renueva por un cron; si el aviso salta, revisar que ese cron
+  esté corriendo y llegando al servidor.
+- **Cert manual/comprado**: renovarlo con el emisor y reinstalarlo antes del día 0.
 
 ## Chequeo funcional (`funcion`)
 
