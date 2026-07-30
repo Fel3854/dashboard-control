@@ -9,6 +9,32 @@ resultado y vuelve a publicar la página. Vos solo abrís el link y mirás los c
 > Esta guía explica **qué mirás** en el panel. Para instalar, configurar secretos o agregar un proyecto,
 > ver el [README](README.md).
 
+## Índice
+
+**[Parte A — Cómo leer el panel](#parte-a--cómo-leer-el-panel-rápido)**
+- [Los colores (el semáforo)](#los-colores-el-semáforo-de-cada-proyecto)
+- [Las 3 cosas que medimos](#las-3-cosas-que-medimos-por-proyecto)
+- [El chip de "función" 🟢/🔴](#el-chip-de-función-)
+- [Etiquetas: 🚨 crítico y 🛠 mantenimiento](#etiquetas-de-fila--crítico-y--mantenimiento)
+- [El resumen de arriba](#el-resumen-de-arriba-1-con-avisos--1-inactivos)
+- [Uptime y "desde"](#uptime-y-desde)
+- [La barra de "datos desactualizados"](#la-barra-roja-de-datos-desactualizados)
+- [Qué hago si veo…](#qué-hago-si-veo)
+
+**[Parte B — Detalle técnico](#parte-b--detalle-técnico)**
+- [Estados de ping](#estados-de-ping-proyectos-tipo-pull)
+- [Chequeo de salud (`/health`)](#chequeo-de-salud-saludjson--health)
+- [Certificado TLS / HTTPS](#certificado-tls--https-proyectos-https)
+- [Chequeo funcional](#chequeo-funcional-funcion)
+- [Heartbeat](#heartbeat-procesos-que-no-se-pingean-ej-rotacion)
+- [Ventanas de mantenimiento](#ventanas-de-mantenimiento)
+- [Cómo se calcula el uptime](#cómo-se-calcula-el-uptime)
+- [Alertas (email / Telegram)](#alertas-email--telegram)
+- [Cada cuánto corre y cómo forzarlo](#cada-cuánto-corre-y-cómo-forzarlo)
+- [Confiabilidad del monitor](#confiabilidad-del-monitor-que-no-muera-en-silencio)
+
+**[Apéndice — Caso "Capacitaciones RRHH"](#apéndice--el-caso-capacitaciones-rrhh)**
+
 ---
 
 # Parte A — Cómo leer el panel (rápido)

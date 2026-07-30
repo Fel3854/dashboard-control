@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { mdToHtml, inline, escapeHtml, renderGuia } from './guia.js';
+import { mdToHtml, inline, escapeHtml, renderGuia, slugify } from './guia.js';
 
 // ── inline ──────────────────────────────────────────────────────────────────
 
@@ -25,12 +25,24 @@ test('inline: escapa HTML fuera de code', () => {
   assert.equal(inline('`<slug>`'), '<code>&lt;slug&gt;</code>');
 });
 
+// ── slugify (anclas del índice, estilo GitHub) ────────────────────────────────
+
+test('slugify: minúsculas, sin puntuación/emoji, espacios->guiones', () => {
+  assert.equal(slugify('Los colores (el semáforo)'), 'los-colores-el-semáforo');
+  assert.equal(slugify('Alertas (email / Telegram)'), 'alertas-email--telegram');
+  assert.equal(slugify('Apéndice — El caso "X"'), 'apéndice--el-caso-x');
+});
+
+test('mdToHtml: los títulos llevan id = slug (para el índice)', () => {
+  assert.match(mdToHtml('## Cómo se calcula el uptime'), /<h2 id="cómo-se-calcula-el-uptime">/);
+});
+
 // ── bloques ─────────────────────────────────────────────────────────────────
 
-test('mdToHtml: headings de distinto nivel', () => {
-  assert.match(mdToHtml('# Uno'), /<h1>Uno<\/h1>/);
-  assert.match(mdToHtml('## Dos'), /<h2>Dos<\/h2>/);
-  assert.match(mdToHtml('### Tres'), /<h3>Tres<\/h3>/);
+test('mdToHtml: headings de distinto nivel (con id)', () => {
+  assert.match(mdToHtml('# Uno'), /<h1 id="uno">Uno<\/h1>/);
+  assert.match(mdToHtml('## Dos'), /<h2 id="dos">Dos<\/h2>/);
+  assert.match(mdToHtml('### Tres'), /<h3 id="tres">Tres<\/h3>/);
 });
 
 test('mdToHtml: párrafo junta líneas y corta en blanco', () => {
@@ -73,5 +85,5 @@ test('renderGuia: envuelve el contenido en una página completa', () => {
   assert.match(html, /<!DOCTYPE html>/);
   assert.match(html, /<link rel="stylesheet" href="styles\.css" \/>/);
   assert.match(html, /Volver al panel/);
-  assert.match(html, /<h1>Título<\/h1>/);
+  assert.match(html, /<h1 id="título">Título<\/h1>/);
 });
