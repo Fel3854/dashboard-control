@@ -9,6 +9,32 @@ resultado y vuelve a publicar la página. Vos solo abrís el link y mirás los c
 > Esta guía explica **qué mirás** en el panel. Para instalar, configurar secretos o agregar un proyecto,
 > ver el [README](README.md).
 
+## Índice
+
+**[Parte A — Cómo leer el panel](#parte-a--cómo-leer-el-panel-rápido)**
+- [Los colores (el semáforo)](#los-colores-el-semáforo-de-cada-proyecto)
+- [Las 3 cosas que medimos](#las-3-cosas-que-medimos-por-proyecto)
+- [El chip de "función" 🟢/🔴](#el-chip-de-función-)
+- [Etiquetas: 🚨 crítico y 🛠 mantenimiento](#etiquetas-de-fila--crítico-y--mantenimiento)
+- [El resumen de arriba](#el-resumen-de-arriba-1-con-avisos--1-inactivos)
+- [Uptime y "desde"](#uptime-y-desde)
+- [La barra de "datos desactualizados"](#la-barra-roja-de-datos-desactualizados)
+- [Qué hago si veo…](#qué-hago-si-veo)
+
+**[Parte B — Detalle técnico](#parte-b--detalle-técnico)**
+- [Estados de ping](#estados-de-ping-proyectos-tipo-pull)
+- [Chequeo de salud (`/health`)](#chequeo-de-salud-saludjson--health)
+- [Certificado TLS / HTTPS](#certificado-tls--https-proyectos-https)
+- [Chequeo funcional](#chequeo-funcional-funcion)
+- [Heartbeat](#heartbeat-procesos-que-no-se-pingean-ej-rotacion)
+- [Ventanas de mantenimiento](#ventanas-de-mantenimiento)
+- [Cómo se calcula el uptime](#cómo-se-calcula-el-uptime)
+- [Alertas (email / Telegram)](#alertas-email--telegram)
+- [Cada cuánto corre y cómo forzarlo](#cada-cuánto-corre-y-cómo-forzarlo)
+- [Confiabilidad del monitor](#confiabilidad-del-monitor-que-no-muera-en-silencio)
+
+**[Apéndice — Caso "Capacitaciones RRHH"](#apéndice--el-caso-capacitaciones-rrhh)**
+
 ---
 
 # Parte A — Cómo leer el panel (rápido)
@@ -51,6 +77,15 @@ Debajo del nombre puede aparecer un chip:
 > pero la función que probamos no anda"*. Es justo lo más valioso de detectar. (Ver el caso real de
 > **Capacitaciones RRHH** en el [Apéndice](#apéndice--el-caso-capacitaciones-rrhh).)
 
+## Etiquetas de fila: 🚨 crítico y 🛠 mantenimiento
+
+Debajo de algunos proyectos pueden aparecer etiquetas (son informativas, no cambian el color):
+
+- 🚨 **crítico** — es un servicio clave, o del que dependen otros (como el **ERP**). Si se cae, su alerta es
+  **CRÍTICA** y escala más rápido que las demás (ver Parte B).
+- 🛠 **mantenimiento** — hay una **ventana de mantenimiento** declarada para ese proyecto: su estado se sigue
+  mostrando, pero **no** dispara alertas (para no avisar de un corte que vos mismo programaste).
+
 ## El resumen de arriba ("1 con avisos · 1 inactivos")
 
 El encabezado cuenta los proyectos por categoría:
@@ -68,6 +103,13 @@ Ejemplo: *"1 con avisos · 1 inactivos"* = 1 proyecto lento/despertando + 1 proc
   En el detalle vas a ver también 7d y 90d. *Lento cuenta como arriba*; solo penaliza estar **caído**.
 - **"desde"** / **"En este estado desde"** — desde cuándo está en el estado actual (ej. *"caído hace 2 h"*).
 
+## La barra roja de "datos desactualizados"
+
+Si arriba de todo aparece una **barra roja** que dice *"Datos posiblemente desactualizados — el último check
+fue hace…"*, quiere decir que el robot **dejó de actualizar** el panel (hace más de 30 min). Ojo: lo de
+abajo puede **no ser el estado actual**, y el problema puede ser el **monitor mismo**, no los proyectos.
+Qué hacer: entrar a GitHub Actions y ver si el workflow *Check & Deploy* está corriendo o quedó en rojo.
+
 ## Qué hago si veo…
 
 - 🔴 **CAÍDO** → el servicio está abajo. Abrir el proyecto, revisar su plataforma (Vercel/Render/Modal/…),
@@ -78,6 +120,12 @@ Ejemplo: *"1 con avisos · 1 inactivos"* = 1 proyecto lento/despertando + 1 proc
 - 🟡 **LENTO** → responde pero tarda. Si persiste, mirar carga/recursos. No es urgente.
 - 🟡 **DESPERTANDO** → normal en servicios que se apagan solos (Render/Modal/Cloud Run). Se acomoda solo.
 - ⚪ **INACTIVO** → un proceso por lotes lleva rato sin reportar. Verificar que su tarea programada corra.
+- 🟥 **barra "datos desactualizados"** → dejó de reportar el **monitor** (no los proyectos). Revisar el
+  workflow *Check & Deploy* en GitHub Actions.
+- ⚠️ **"cert vence en X días"** (en el detalle) → al certificado HTTPS le quedan pocos días; **renovarlo
+  antes** de que venza (un cert vencido tira el servicio).
+- 🛠 **mantenimiento** → ese proyecto está en una ventana planificada: sus alertas están silenciadas a
+  propósito, no te preocupes por ese.
 
 *Tip:* el botón **"Forzar chequeo"** abre GitHub Actions para correr la revisión ahora, sin esperar los
 10 minutos. Cada tarjeta se **expande** (▸) para ver latencia, HTTP, salud, la función probada y los
@@ -118,6 +166,47 @@ Si el proyecto tiene `salud_json: true` y el ping salió OK/LENTO/DESPERTANDO, e
   `uptime_s`, `commit`); todo lo demás se descarta y los textos se recortan. Nunca expone tokens ni
   connection strings aunque el endpoint los devuelva.
 
+## Certificado TLS / HTTPS (proyectos `https`)
+
+El certificado HTTPS es lo que hace andar el **candado** del navegador: cifra el tráfico y prueba que el
+dominio es legítimo. Tiene **fecha de vencimiento** (Let's Encrypt dura 90 días; otros emisores, 1 año) y hay
+que **renovarlo** antes de esa fecha. La renovación suele ser automática… hasta que un día no lo es.
+
+### Qué pasa si vence (y por qué avisamos con anticipación)
+
+Un certificado vencido **no es un aviso amarillo: es una caída total**, y por partida triple:
+
+- **Los usuarios quedan afuera.** El navegador **bloquea** el sitio con una pantalla de error roja
+  (*"Tu conexión no es privada"* / `NET::ERR_CERT_DATE_INVALID`) — no pueden entrar aunque el servidor esté
+  perfecto por detrás.
+- **Se rompen las integraciones.** Las apps y APIs que consumen el servicio **cortan la conexión** (fallan
+  todos los pedidos HTTPS), aunque el backend funcione bien.
+- **En el dashboard se ve 🔴 CAÍDO.** El propio ping falla, porque rechaza la conexión TLS inválida. O sea:
+  cuando ya lo ves en rojo, el daño ya está hecho.
+
+Por eso el checker no espera a que caduque. Para cada proyecto `https` que responde, abre una conexión TLS
+aparte y lee **cuántos días le quedan** al certificado — lo ves en el detalle (*"Certificado TLS: vence en 60
+días"*). Cuando quedan **≤ 21 días** (configurable con `CERT_AVISO_DIAS`), manda un **aviso** anticipado
+(severidad AVISO, como mucho **1 vez por día**). Es la diferencia entre **renovar tranquilo un martes** y
+tener **todo caído un domingo a la madrugada**.
+
+```
+   hoy ─────────────────────────────▶ vencimiento
+        ✅ todo normal   │  🟡 aviso   │  🔴 CAÍDO
+                     ≤ 21 días        día 0
+                    "vence en N d"   sitio bloqueado
+```
+
+Es **best-effort**: solo lee la fecha del cert (no valida la cadena; de eso ya se encarga el ping); si no se
+puede leer, no muestra nada y no rompe el checker. (`[checker/tls.js](checker/tls.js)`.)
+
+### Cómo se renueva
+
+- **Plataformas gestionadas** (Vercel, Render, Cloud Run): renuevan solas, no hay que hacer nada.
+- **Let's Encrypt propio** (`certbot`): se auto-renueva por un cron; si el aviso salta, revisar que ese cron
+  esté corriendo y llegando al servidor.
+- **Cert manual/comprado**: renovarlo con el emisor y reinstalarlo antes del día 0.
+
 ## Chequeo funcional (`funcion`)
 
 Ejecuta una secuencia de pasos HTTP reales y valida cada respuesta. Sirve para detectar fallas que un
@@ -150,6 +239,19 @@ Algunos procesos corren por lotes y no tienen URL para pinguear: en vez de eso, 
 Decisión de diseño: el silencio de un batch de cadencia irregular **no** dispara rojo (evita falsas
 alarmas); el rojo se reserva para un `ok: false` explícito.
 
+## Ventanas de mantenimiento
+
+Para silenciar las alertas de un corte **planificado** (deploy, migración, ventana de proveedor), se declaran
+ventanas en `mantenimiento.json` (hay un ejemplo en `mantenimiento.example.json`):
+
+```json
+[{ "nombre": "ERP Masterbus", "desde": "2026-08-01T02:00:00Z", "hasta": "2026-08-01T04:00:00Z", "motivo": "Migración" }]
+```
+
+Durante la ventana, el estado del proyecto **se sigue registrando** (color, uptime, historial), pero **no se
+manda ninguna alerta**, y el panel le muestra el badge **🛠 mantenimiento**. `"nombre": "*"` aplica a todos
+los proyectos (útil para un corte global). (`[checker/mantenimiento.js](checker/mantenimiento.js)`.)
+
 ## Cómo se calcula el uptime
 
 `history.json` guarda solo **transiciones** de estado (no una muestra por corrida). El uptime reconstruye
@@ -163,24 +265,52 @@ a 1 decimal. Ventanas: **7 / 30 / 90 días**; la fila muestra la de 30. (`[check
 ## Alertas (email / Telegram)
 
 Después de cada chequeo, `[checker/notify.js](checker/notify.js)` compara con el estado anterior y avisa
-solo ante transiciones que importan (con **cooldown de 6 h** para no spamear):
+solo ante lo que importa, con **cooldown** para no spamear. Cada alerta lleva una **severidad**:
 
-| Evento | Cuándo |
-|--------|--------|
-| 🔴 Caída | Un proyecto **pasó a CAÍDO**. |
-| 🔴 Sigue caído | Sigue CAÍDO y pasaron ≥ 6 h desde el último aviso (recordatorio). |
-| 🟢 Recuperado | Volvió de CAÍDO. |
-| 🔴 Función falla / sigue fallando / 🟢 recuperada | Igual, pero para el chequeo funcional (avisa aunque el semáforo esté verde). |
+| Evento | Cuándo | Severidad |
+|--------|--------|-----------|
+| 🔴 Caída | Un proyecto **pasó a CAÍDO**. | CRÍTICO si es crítico; si no, AVISO |
+| 🔴 Sigue caído (recordatorio) | Sigue CAÍDO y venció el cooldown. | igual que la caída |
+| 🚨 Escalamiento | Un **crítico** sigue caído **> 1 h**. Asunto más urgente. | CRÍTICO |
+| 🟢 Recuperado | Volvió de CAÍDO. | INFO |
+| 🔴 Función falla / sigue / 🟢 recuperada | Igual, para el chequeo funcional (avisa aunque el semáforo esté verde). | según criticidad |
+| 🟡 Cert por vencer | Al certificado le quedan ≤ 21 días. | AVISO |
+| 🟡 Lento sostenido | Sigue **LENTO** de forma continua ≥ 45 min. | AVISO |
+| 🟡 Inestable (flapping) | **Rebota** de estado (≥ 4 cambios en 1 h): un solo aviso en vez de spam. | AVISO |
 
-**No** alertan LENTO, DESPERTANDO, INACTIVO ni SIN_DATOS (son ruido operativo, no caídas). Los canales
-(email/Telegram) son opcionales: si su secret no está cargado, ese canal se saltea. (Setup en el
-[README](README.md).)
+- **Severidad y asunto:** si hay algo CRÍTICO, el asunto del mail lleva el prefijo **`[🚨 CRÍTICO]`** (para
+  triage rápido). Un servicio es crítico si tiene `"critico": true` en [proyectos.json](proyectos.json), o
+  si es una dependencia (`es_dependencia`, ej. el **ERP**).
+- **Escalamiento:** los críticos recuerdan cada **30 min** (los demás, cada **6 h**), y con el secret
+  opcional `MAIL_TO_CRITICO` la alerta va **también** a una lista de guardia extra.
+- **Anti-spam:** cooldowns separados por proyecto y evento; el flapping colapsa muchos rebotes en un solo
+  aviso; el cert avisa como mucho **1 vez por día**.
+- **No** alertan un LENTO puntual, DESPERTANDO, INACTIVO ni SIN_DATOS (ruido, no caídas). Un proyecto en
+  **ventana de mantenimiento** tampoco genera ninguna alerta (ver *Ventanas de mantenimiento*).
+- Los canales (email/Telegram) son opcionales: si su secret no está cargado, ese canal se saltea.
+  (Setup en el [README](README.md).)
 
 ## Cada cuánto corre y cómo forzarlo
 
 Corre por cron cada ~10 min, y también al cambiar la config/código. El botón **"Forzar chequeo"** del panel
 abre la página de GitHub Actions para dispararlo a mano (un panel estático público no puede guardar un token
 de escritura, por eso te manda a Actions). El panel además se refresca solo cada 60 s en el navegador.
+
+## Confiabilidad del monitor (que no muera en silencio)
+
+Un monitor no sirve si se cae sin avisar. Las capas que evitan eso:
+
+- **Datos frescos:** si el panel queda **> 30 min** sin actualizarse, muestra la **barra roja** de datos
+  desactualizados (señal de que el checker dejó de correr).
+- **Dead-man switch (opcional):** con el secret `HEALTHCHECK_URL` (un check gratis en healthchecks.io), el
+  workflow "pinguea" al terminar cada corrida; si GitHub deja de correr el cron o Actions se cae,
+  healthchecks.io te avisa **desde afuera de GitHub**.
+- **Entrega garantizada:** si había una alerta y **ningún** canal la entregó (SMTP roto, etc.), el run de
+  Actions queda en **rojo** (visible) en vez de tragarse el aviso en silencio.
+- **Canario semanal:** el workflow `canary-alertas.yml` manda una alerta de prueba cada lunes para confirmar
+  que email/Telegram siguen vivos. (También podés disparar una a mano con el input `test_alerta`.)
+- **Tests antes de deployar:** el workflow corre la batería de tests antes de publicar, así un bug en la
+  lógica de estado o de alertas no llega a producción.
 
 ---
 

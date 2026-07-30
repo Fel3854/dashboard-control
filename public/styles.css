@@ -142,6 +142,11 @@ body {
   color: var(--primario);
 }
 
+/* El botón "Manual" vive en la topbar, anclado a la derecha. */
+.topbar .btn-manual {
+  margin-left: auto;
+}
+
 /* ── Panel / items ── */
 .panel {
   display: flex;
