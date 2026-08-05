@@ -594,6 +594,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-04T20:14:48.446Z"
+    },
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "LENTO",
+      "timestamp": "2026-08-05T10:07:48.834Z"
     }
   ]
 }
