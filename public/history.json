@@ -654,6 +654,11 @@
       "nombre": "Controles Stock Telegram",
       "estado": "OK",
       "timestamp": "2026-08-14T05:51:29.004Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-08-15T08:02:52.053Z"
     }
   ]
 }
