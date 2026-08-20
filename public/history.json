@@ -804,6 +804,16 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-20T02:42:20.416Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-08-20T03:32:53.152Z"
+    },
+    {
+      "nombre": "ERP Masterbus",
+      "estado": "LENTO",
+      "timestamp": "2026-08-20T03:32:53.152Z"
     }
   ]
 }
