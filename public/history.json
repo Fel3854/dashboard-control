@@ -904,6 +904,11 @@
       "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-08-23T04:04:50.097Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-08-23T13:05:30.869Z"
     }
   ]
 }
