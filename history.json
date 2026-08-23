@@ -884,6 +884,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-23T00:25:22.685Z"
+    },
+    {
+      "nombre": "Controles Stock Telegram",
+      "estado": "LENTO",
+      "timestamp": "2026-08-23T02:09:39.002Z"
     }
   ]
 }
