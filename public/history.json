@@ -929,6 +929,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "DESPERTANDO",
       "timestamp": "2026-08-25T14:00:20.223Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-08-25T15:00:36.707Z"
     }
   ]
 }
