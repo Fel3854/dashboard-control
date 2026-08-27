@@ -16,7 +16,7 @@ Panel de control central para ver de un vistazo si **todos los proyectos del eco
 | Proyecto | Deploy | Chequeo | Nota |
 |---|---|---|---|
 | Consultas BD Mantenimiento | Render | `GET /health` + `/api/flota` | Render **duerme ~15 min** → reintentos, no marcar caído en cold start |
-| Controles Stock Telegram | Cloud Run | `GET /health` | cold start posible |
+| Controles Stock Telegram | Cloud Run | `GET` (solo ping) | **depende del ERP** (lo consulta por detrás); cold start posible |
 | ~~Sistema Compras~~ | Railway | — | **Retirado (2026-07):** salió del ecosistema, ya no se monitorea |
 | Sistema Cubiertas | Vercel | `GET /` (home/login) | serverless |
 | **ERP Masterbus** (dependencia) | MySQL + web | `GET` a `mantenimiento.masterbus.net` | punto único de falla de 3 proyectos |
@@ -25,6 +25,13 @@ Panel de control central para ver de un vistazo si **todos los proyectos del eco
 **Dos modelos de chequeo:**
 - **Pull** (el monitor pinguea una URL) → para los servicios web.
 - **Push / heartbeat** (el proceso avisa "corrí OK") → para batch/local como Rotación.
+
+**Dependencias conocidas:** el **bot de Controles Stock consulta el ERP Masterbus** por detrás
+(cadena real: usuario en Telegram → bot en Cloud Run → ERP/MySQL). Hoy el bot se monitorea **solo con
+ping**, así que si responde `200` pero su integración con el ERP está rota (credenciales, esquema,
+conexión), el panel **no lo detecta** — es un punto ciego. *Mitigación parcial:* el ERP tiene chequeo
+funcional propio y está marcado crítico, así que una caída **total** del ERP sí alerta. *Pendiente:* un
+chequeo funcional read-only en el bot que ejercite una consulta al ERP (ver GUIA.md → «Chequeo funcional»).
 
 ## Stack tecnológico (100% gratuito)
 

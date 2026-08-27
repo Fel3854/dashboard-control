@@ -224,6 +224,12 @@ Ejecuta una secuencia de pasos HTTP reales y valida cada respuesta. Sirve para d
 - Los tres patrones ya configurados: **Cubiertas** (login por formulario + consulta), **ERP** (Laravel:
   CSRF + sesión), **Capacitaciones** (Supabase Auth `signInWithPassword`).
 
+> **Punto ciego conocido — Controles Stock:** el bot de stock **consulta el ERP** por detrás, pero hoy se
+> monitorea **solo con ping** (no tiene bloque `funcion`). Si el bot responde `200` pero su consulta al ERP
+> está rota, el panel no lo ve. Queda **parcialmente** cubierto porque el **ERP** sí tiene chequeo funcional
+> y es crítico (una caída total del ERP alerta). *Pendiente:* agregarle al bot un endpoint **read-only** que
+> toque el ERP, para chequear la cadena de punta a punta.
+
 ## Heartbeat (procesos que no se pingean, ej. Rotacion)
 
 Algunos procesos corren por lotes y no tienen URL para pinguear: en vez de eso, **avisan** cuando corren
