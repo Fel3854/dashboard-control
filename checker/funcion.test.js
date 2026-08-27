@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar, esTransitorio, extraerValor, mensajeError } from './funcion.js';
+import { cumpleEspera, evaluarFuncion, ejecutarFuncion, interpolar, esTransitorio, extraerValor, mensajeError, pareceHtml } from './funcion.js';
 
 const noopSleep = async () => {}; // anula el backoff de reintentos en los tests
 
@@ -91,10 +91,46 @@ test('cumpleEspera: falta el campo JSON esperado -> falla', () => {
   assert.match(r.motivo, /sugerido/);
 });
 
-test('cumpleEspera: respuesta HTML cuando se esperaba JSON -> falla', () => {
+test('cumpleEspera: respuesta HTML cuando se esperaba JSON -> falla y lo dice', () => {
   const r = cumpleEspera({ json_tiene: ['x'] }, { status: 200, json: null, texto: '<html>' });
   assert.equal(r.ok, false);
   assert.match(r.motivo, /no es JSON/);
+  assert.match(r.motivo, /vino HTML/); // la pista: la app reboto a una pantalla
+});
+
+test('cumpleEspera: no-JSON que tampoco es HTML -> motivo sin la pista de HTML', () => {
+  const r = cumpleEspera({ json_tiene: ['x'] }, { status: 200, json: null, texto: 'ERR 42' });
+  assert.equal(r.ok, false);
+  assert.equal(r.motivo, 'la respuesta no es JSON');
+});
+
+test('pareceHtml: reconoce doctype/html/head y descarta lo demas', () => {
+  assert.equal(pareceHtml('  <!DOCTYPE html><html>'), true);
+  assert.equal(pareceHtml('<html lang="es">'), true);
+  assert.equal(pareceHtml('<!-- x -->\n<head>'), true);
+  assert.equal(pareceHtml('{"sugerido":"1"}'), false);
+  assert.equal(pareceHtml(null), false);
+});
+
+// El caso real de Sistema Cubiertas (24/8/26): el endpoint quedo detras de un permiso que el
+// usuario de monitoreo (solo lectura) no tiene, y el server lo rebota con 302 a la home. Con
+// `no_seguir_redirect` el motivo nombra el destino en vez de terminar en un HTML sin explicar.
+test('cumpleEspera: redirect inesperado -> el motivo dice adonde redirige', () => {
+  const r = cumpleEspera({ status: 200 }, { status: 302, json: null, texto: '', location: '/' });
+  assert.equal(r.ok, false);
+  assert.match(r.motivo, /status 302 \(esperaba 200\)/);
+  assert.match(r.motivo, /redirige a '\/'/);
+});
+
+test('cumpleEspera: login rechazado (200 con el form) -> falla en el paso login', () => {
+  // La app renderiza el login con 200 cuando la credencial es mala: exigir 302 lo detecta ACA,
+  // en vez de dejarlo pasar y que reviente el paso siguiente con un motivo enganoso.
+  const r = cumpleEspera(
+    { status: 302, location_no_incluye: '/login' },
+    { status: 200, json: null, texto: '<html>Usuario o contrasena incorrectos</html>', location: null },
+  );
+  assert.equal(r.ok, false);
+  assert.match(r.motivo, /status 200 \(esperaba 302\)/);
 });
 
 test('cumpleEspera: json_array_no_vacio con array de filas -> ok', () => {

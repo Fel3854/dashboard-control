@@ -6,7 +6,7 @@
     "plataforma": "Vercel",
     "salud_json": true,
     "funcion": {
-      "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
+      "descripcion": "Login + cubiertas montadas de una unidad (valida login, DB y lógica)",
       "requiere_secrets": ["CUBIERTAS_USER", "CUBIERTAS_PASS"],
       "pasos": [
         {
@@ -14,15 +14,16 @@
           "url": "https://sist-cubiertas.vercel.app/login",
           "metodo": "POST",
           "cuerpo_form": { "usr": "env:CUBIERTAS_USER", "pass": "env:CUBIERTAS_PASS" },
-          "guardar_cookie": "token",
-          "espera": { "status": [200, 302] }
+          "no_seguir_redirect": true,
+          "espera": { "status": 302, "location_no_incluye": "/login" }
         },
         {
           "nombre": "consulta",
-          "url": "https://sist-cubiertas.vercel.app/ajax/ultimo_fuego",
+          "url": "https://sist-cubiertas.vercel.app/ajax/cubiertas_unidad?unidad_id=6",
           "metodo": "GET",
           "usar_cookie": true,
-          "espera": { "status": 200, "json_tiene": ["sugerido"] }
+          "no_seguir_redirect": true,
+          "espera": { "status": 200, "json_tiene": ["tipo_unidad", "cubiertas"], "texto_incluye": "\"fuego\"" }
         }
       ]
     }

@@ -221,8 +221,23 @@ Ejecuta una secuencia de pasos HTTP reales y valida cada respuesta. Sirve para d
 - **Motivo detallado:** si un paso devuelve un status inesperado y el cuerpo trae un mensaje de error
   (`error_description`/`msg`/`message`/`error`), se anexa al motivo. Así el panel muestra
   *"status 400: Invalid login credentials"* en vez de solo *"status 400"*. (`cumpleEspera` + `mensajeError`.)
+- **Motivo detallado (2):** si el paso termina en un **redirect** inesperado, el motivo dice **adónde**
+  (*"status 302 (esperaba 200) → redirige a '/'"*); y si un endpoint JSON devuelve **HTML**, lo aclara
+  (*"vino HTML — la app rebotó a una pantalla"*). Los dos casos apuntan casi siempre a lo mismo: sesión
+  vencida o falta de permiso. Por eso los pasos llevan `no_seguir_redirect: true`: seguir el redirect
+  esconde la pista detrás de una pantalla cualquiera.
 - Los tres patrones ya configurados: **Cubiertas** (login por formulario + consulta), **ERP** (Laravel:
   CSRF + sesión), **Capacitaciones** (Supabase Auth `signInWithPassword`).
+
+> **Lección aprendida — el usuario de prueba y los permisos (Cubiertas, 24/8/26):** el chequeo consultaba
+> `/ajax/ultimo_fuego`; un deploy de Cubiertas puso ese endpoint detrás del permiso **crear cubiertas**, que
+> el usuario de monitoreo (`LECTURA_TEST`, solo lectura) no tiene. El servidor lo rebotaba a la home y el
+> panel mostraba *"falló en consulta — la respuesta no es JSON"* durante tres días, **con el servicio sano**.
+> Se repuntó el chequeo a `/ajax/cubiertas_unidad` (permiso de **ver**, que sí tiene). Regla: **no le amplíes
+> permisos al usuario de monitoreo para que pase el check** — esas credenciales viven en GitHub Secrets y
+> conviene que no puedan escribir; mové el chequeo a un endpoint de lectura. Y ojo: la URL lleva un
+> `unidad_id` fijo, así que si esa unidad se da de baja o se queda sin cubiertas montadas, hay que apuntarla
+> a otra.
 
 > **Punto ciego conocido — Controles Stock:** el bot de stock **consulta el ERP** por detrás, pero hoy se
 > monitorea **solo con ping** (no tiene bloque `funcion`). Si el bot responde `200` pero su consulta al ERP
