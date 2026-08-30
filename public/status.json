@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-08-30T18:37:03.344Z",
+  "timestamp": "2026-08-30T21:33:29.175Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1635,
+      "latencia_ms": 2772,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-08-22T12:58:33.122Z",
@@ -14,19 +14,19 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 1
+        "uptime_s": 2
       },
       "funcion": {
         "estado": "FUNCION_FALLA",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 472,
+        "duracion_ms": 805,
         "paso_fallo": "consulta",
         "motivo": "la respuesta no es JSON",
         "desde": "2026-08-24T15:04:30.383Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 89
+        "dias_para_vencer": 88
       },
       "uptimes": {
         "7": 100,
@@ -39,7 +39,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 352,
+      "latencia_ms": 351,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-08-19T11:41:06.627Z",
@@ -47,12 +47,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 445764
+        "uptime_s": 456352
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 165,
+        "duracion_ms": 145,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
@@ -70,13 +70,13 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 69,
+      "latencia_ms": 103,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-08-23T03:15:13.523Z",
       "salud": null,
       "tls": {
-        "valido_hasta": "Nov  2 08:37:15 2026 GMT",
+        "valido_hasta": "Nov  2 08:37:23 2026 GMT",
         "dias_para_vencer": 63
       },
       "uptimes": {
@@ -89,18 +89,18 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
-      "estado": "OK",
-      "latencia_ms": 2885,
+      "estado": "LENTO",
+      "latencia_ms": 3566,
       "http_code": 200,
       "plataforma": "Modal",
-      "desde": "2026-08-30T18:37:03.344Z",
+      "desde": "2026-08-30T21:33:29.175Z",
       "salud": {
         "status": "ok"
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 61,
+        "duracion_ms": 106,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -118,19 +118,19 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1167,
+      "latencia_ms": 1205,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-07-05T17:52:03.504Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1111,
+        "duracion_ms": 1167,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 89
+        "dias_para_vencer": 88
       },
       "uptimes": {
         "7": 100,
@@ -143,7 +143,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 675,
+      "latencia_ms": 735,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-08-23T04:04:50.097Z",
@@ -151,7 +151,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 180,
+        "duracion_ms": 201,
         "desde": "2026-07-06T14:24:31.173Z"
       },
       "tls": {
