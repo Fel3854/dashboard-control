@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-01T19:34:51.601Z",
+  "timestamp": "2026-09-01T22:00:11.115Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 276,
+      "latencia_ms": 1551,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-08-22T12:58:33.122Z",
@@ -14,19 +14,19 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 481
+        "uptime_s": 1
       },
       "funcion": {
         "estado": "FUNCION_FALLA",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 480,
+        "duracion_ms": 584,
         "paso_fallo": "consulta",
         "motivo": "la respuesta no es JSON",
         "desde": "2026-08-24T15:04:30.383Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 87
+        "dias_para_vencer": 86
       },
       "uptimes": {
         "7": 100,
@@ -39,7 +39,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 252,
+      "latencia_ms": 230,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-08-19T11:41:06.627Z",
@@ -47,17 +47,17 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 622031
+        "uptime_s": 630752
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 138,
+        "duracion_ms": 143,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
         "valido_hasta": "Oct 22 21:54:17 2026 GMT",
-        "dias_para_vencer": 51
+        "dias_para_vencer": 50
       },
       "uptimes": {
         "7": 100,
@@ -70,13 +70,13 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 93,
+      "latencia_ms": 112,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-08-23T03:15:13.523Z",
       "salud": null,
       "tls": {
-        "valido_hasta": "Nov  2 08:37:23 2026 GMT",
+        "valido_hasta": "Nov  2 08:37:15 2026 GMT",
         "dias_para_vencer": 61
       },
       "uptimes": {
@@ -90,7 +90,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 5348,
+      "latencia_ms": 7831,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-08-31T11:05:32.282Z",
@@ -100,7 +100,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 283,
+        "duracion_ms": 348,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -118,19 +118,19 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1495,
+      "latencia_ms": 1114,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-07-05T17:52:03.504Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1517,
+        "duracion_ms": 1185,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 87
+        "dias_para_vencer": 86
       },
       "uptimes": {
         "7": 100,
@@ -143,7 +143,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 732,
+      "latencia_ms": 1014,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-08-23T04:04:50.097Z",
@@ -151,7 +151,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 206,
+        "duracion_ms": 242,
         "desde": "2026-07-06T14:24:31.173Z"
       },
       "tls": {
