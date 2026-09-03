@@ -1,11 +1,6 @@
 {
   "eventos": [
     {
-      "nombre": "ERP Masterbus",
-      "estado": "OK",
-      "timestamp": "2026-06-05T00:57:11.297Z"
-    },
-    {
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-06-05T01:40:43.709Z"
