@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-04T19:35:56.638Z",
+  "timestamp": "2026-09-04T21:48:15.694Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 2311,
+      "latencia_ms": 1687,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-08-22T12:58:33.122Z",
@@ -14,19 +14,19 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 2
+        "uptime_s": 1
       },
       "funcion": {
         "estado": "FUNCION_FALLA",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 562,
+        "duracion_ms": 633,
         "paso_fallo": "consulta",
         "motivo": "la respuesta no es JSON",
         "desde": "2026-08-24T15:04:30.383Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 84
+        "dias_para_vencer": 83
       },
       "uptimes": {
         "7": 100,
@@ -39,7 +39,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 198,
+      "latencia_ms": 204,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-08-19T11:41:06.627Z",
@@ -47,12 +47,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 15217
+        "uptime_s": 23155
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 139,
+        "duracion_ms": 145,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
@@ -70,13 +70,13 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 103,
+      "latencia_ms": 124,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-08-23T03:15:13.523Z",
       "salud": null,
       "tls": {
-        "valido_hasta": "Nov  2 08:37:15 2026 GMT",
+        "valido_hasta": "Nov  2 08:37:23 2026 GMT",
         "dias_para_vencer": 58
       },
       "uptimes": {
@@ -90,7 +90,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 5612,
+      "latencia_ms": 4881,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-09-04T13:42:48.157Z",
@@ -100,7 +100,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 580,
+        "duracion_ms": 183,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -118,19 +118,19 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1126,
+      "latencia_ms": 1052,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-07-05T17:52:03.504Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1271,
+        "duracion_ms": 1357,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 84
+        "dias_para_vencer": 83
       },
       "uptimes": {
         "7": 100,
@@ -143,7 +143,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1080,
+      "latencia_ms": 734,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-08-23T04:04:50.097Z",
@@ -151,7 +151,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 236,
+        "duracion_ms": 203,
         "desde": "2026-09-03T01:43:43.935Z"
       },
       "tls": {
@@ -178,7 +178,7 @@
       "uptimes": {
         "7": 100,
         "30": 100,
-        "90": 95.6
+        "90": 95.7
       },
       "uptime": 100
     }
