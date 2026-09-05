@@ -6,11 +6,6 @@
       "timestamp": "2026-06-05T01:40:43.709Z"
     },
     {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-06-05T01:40:43.709Z"
-    },
-    {
       "nombre": "Controles Stock Telegram",
       "estado": "OK",
       "timestamp": "2026-06-05T01:40:43.709Z"
@@ -24,11 +19,6 @@
       "nombre": "Rotacion",
       "estado": "CAIDO",
       "timestamp": "2026-06-06T16:40:29.803Z"
-    },
-    {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-06-07T10:35:32.276Z"
     },
     {
       "nombre": "Consultas BD Mantenimiento",
