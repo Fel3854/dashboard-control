@@ -929,6 +929,16 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-09-04T13:42:48.157Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-09-10T18:32:48.552Z"
+    },
+    {
+      "nombre": "Capacitaciones RRHH",
+      "estado": "LENTO",
+      "timestamp": "2026-09-10T18:32:48.552Z"
     }
   ]
 }
