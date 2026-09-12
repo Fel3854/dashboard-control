@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-12T19:01:36.605Z",
+  "timestamp": "2026-09-12T21:25:18.298Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 2183,
+      "latencia_ms": 1618,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-08-22T12:58:33.122Z",
@@ -14,19 +14,19 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 2
+        "uptime_s": 1
       },
       "funcion": {
         "estado": "FUNCION_FALLA",
         "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
-        "duracion_ms": 556,
+        "duracion_ms": 576,
         "paso_fallo": "consulta",
         "motivo": "la respuesta no es JSON",
         "desde": "2026-08-24T15:04:30.383Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 76
+        "dias_para_vencer": 75
       },
       "uptimes": {
         "7": 100,
@@ -39,7 +39,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 224,
+      "latencia_ms": 273,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-09-10T21:11:01.080Z",
@@ -47,12 +47,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 97726
+        "uptime_s": 106347
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 128,
+        "duracion_ms": 163,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
@@ -70,13 +70,13 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 100,
+      "latencia_ms": 96,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-08-23T03:15:13.523Z",
       "salud": null,
       "tls": {
-        "valido_hasta": "Nov  2 08:37:15 2026 GMT",
+        "valido_hasta": "Nov  2 08:37:23 2026 GMT",
         "dias_para_vencer": 50
       },
       "uptimes": {
@@ -90,7 +90,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 3313,
+      "latencia_ms": 4525,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-09-11T06:06:40.804Z",
@@ -100,7 +100,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 121,
+        "duracion_ms": 255,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -118,19 +118,19 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1303,
+      "latencia_ms": 1066,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-09-10T21:11:01.080Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1352,
+        "duracion_ms": 1270,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
         "valido_hasta": "Nov 27 19:48:08 2026 GMT",
-        "dias_para_vencer": 76
+        "dias_para_vencer": 75
       },
       "uptimes": {
         "7": 100,
@@ -142,22 +142,12 @@
     {
       "nombre": "ERP Masterbus",
       "tipo": "pull",
-      "estado": "OK",
-      "latencia_ms": 905,
-      "http_code": 200,
+      "estado": "CAIDO",
+      "latencia_ms": 10000,
+      "http_code": null,
       "plataforma": "propio",
-      "desde": "2026-08-23T04:04:50.097Z",
+      "desde": "2026-09-12T21:25:18.298Z",
       "critico": true,
-      "funcion": {
-        "estado": "FUNCION_OK",
-        "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 241,
-        "desde": "2026-09-03T01:43:43.935Z"
-      },
-      "tls": {
-        "valido_hasta": "Oct 16 13:08:25 2026 GMT",
-        "dias_para_vencer": 33
-      },
       "uptimes": {
         "7": 100,
         "30": 100,
