@@ -974,6 +974,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "LENTO",
       "timestamp": "2026-09-14T01:00:29.130Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-09-14T06:13:02.641Z"
     }
   ]
 }
