@@ -984,6 +984,11 @@
       "nombre": "Rotacion",
       "estado": "CAIDO",
       "timestamp": "2026-09-14T18:34:54.233Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "OK",
+      "timestamp": "2026-09-14T21:02:28.621Z"
     }
   ]
 }
