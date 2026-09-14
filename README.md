@@ -142,14 +142,17 @@ detalle al expandir. Si la función falla **aunque el ping esté en verde**, dis
 
 ```jsonc
 "funcion": {
-  "descripcion": "Login + consulta de último fuego (valida login, DB y lógica)",
+  "descripcion": "Login + cubiertas montadas de una unidad (valida login, DB y lógica)",
   "requiere_secrets": ["CUBIERTAS_USER", "CUBIERTAS_PASS"],  // si faltan -> FUNCION_OMITIDA
   "pasos": [
     { "nombre": "login", "url": ".../login", "metodo": "POST",
       "cuerpo_form": { "usr": "env:CUBIERTAS_USER", "pass": "env:CUBIERTAS_PASS" },
-      "guardar_cookie": "token", "espera": { "status": [200, 302] } },
-    { "nombre": "consulta", "url": ".../ajax/ultimo_fuego", "metodo": "GET",
-      "usar_cookie": true, "espera": { "status": 200, "json_tiene": ["sugerido"] } }
+      "no_seguir_redirect": true,                            // el login OK responde 302
+      "espera": { "status": 302, "location_no_incluye": "/login" } },
+    { "nombre": "consulta", "url": ".../ajax/cubiertas_unidad?unidad_id=6", "metodo": "GET",
+      "usar_cookie": true, "no_seguir_redirect": true,
+      "espera": { "status": 200, "json_tiene": ["tipo_unidad", "cubiertas"],
+                  "texto_incluye": "\"fuego\"" } }
   ]
 }
 ```
@@ -170,6 +173,22 @@ detalle al expandir. Si la función falla **aunque el ping esté en verde**, dis
   `texto_no_incluye` (substring, para HTML — ej. detectar el form de login = no autenticado),
   `location_incluye` / `location_no_incluye` (sobre el redirect — ej. login OK redirige fuera de
   `/login`). Corta en el primer paso que falla.
+- **Exigí el status EXACTO del login.** Muchas apps renderizan el form de login con **200** cuando
+  la credencial es mala. Un `espera: { status: [200, 302] }` en ese paso deja pasar un login
+  rechazado y la falla aparece recién en el paso siguiente, con un motivo engañoso. Pedí el `302`
+  del login exitoso (`no_seguir_redirect: true` + `location_no_incluye: "/login"`).
+- **Usá `no_seguir_redirect` también en los pasos de consulta.** Si no, un rebote por sesión
+  vencida o por falta de permiso se sigue hasta una pantalla y llega como HTML: el motivo queda en
+  "la respuesta no es JSON", que no dice nada. Sin seguirlo, el motivo nombra el destino
+  (`status 302 (esperaba 200) → redirige a '/'`) y el diagnóstico es inmediato.
+- **El usuario de monitoreo tiene que poder ejecutar lo que chequeás.** Si el servicio tiene
+  permisos granulares, elegí un endpoint cubierto por los permisos de **solo lectura** del usuario
+  de prueba. Ampliarle los permisos al usuario para que pase el check es al revés: esa cuenta vive
+  en GitHub Secrets y conviene que no pueda escribir. Pasó con Cubiertas el 24/8/26: un deploy
+  puso `/ajax/ultimo_fuego` detrás del permiso de *crear*, y el check quedó en rojo tres días.
+- **Ojo con los IDs fijos en la URL.** `unidad_id=6` ata el check a una fila concreta: si esa
+  unidad se da de baja o se queda sin cubiertas montadas, el check da rojo sin que el servicio
+  tenga nada malo. Si eso pasa, apuntá a otra unidad con ruedas.
 - **Sin login:** si la función es pública (ej. una consulta GET), omití `requiere_secrets` y el
   paso de login: un solo paso con su `espera` alcanza (ver "Consultas BD" / "Fichadas").
 - **Tres patrones ya implementados** (ver `proyectos.json`): cookie+token de form (Cubiertas),

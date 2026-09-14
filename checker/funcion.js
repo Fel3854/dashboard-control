@@ -78,6 +78,18 @@ export function mensajeError(json) {
   return null;
 }
 
+/**
+ * ¿El cuerpo es HTML? Se usa para que "no es JSON" diga TAMBIEN de que se trata: cuando un
+ * endpoint JSON devuelve HTML, casi siempre es la app rebotando la request a una pantalla
+ * (login por sesion vencida, o la home por falta de permisos) y el fetch siguio el redirect.
+ * Sin esta pista el motivo es un callejon sin salida ("la respuesta no es JSON" a secas).
+ */
+export function pareceHtml(texto) {
+  if (typeof texto !== 'string') return false;
+  const cabeza = texto.trimStart().slice(0, 200).toLowerCase();
+  return cabeza.startsWith('<!doctype html') || cabeza.startsWith('<html') || cabeza.includes('<head');
+}
+
 // ── Aserciones (PURA — sin red) ───────────────────────────────────────────────
 
 /**
@@ -107,7 +119,13 @@ export function cumpleEspera(espera = {}, resultado) {
       // para que el motivo diga QUE fallo, no solo el codigo. Sin body util, queda como antes.
       const detalle = mensajeError(resultado.json);
       const base = `status ${resultado.status ?? '-'} (esperaba ${aceptados.join('/')})`;
-      return { ok: false, motivo: detalle ? `${base}: ${detalle}` : base };
+      if (detalle) return { ok: false, motivo: `${base}: ${detalle}` };
+      // Un redirect inesperado se explica solo con su destino: "302 -> /login" es sesion caida,
+      // "302 -> /" suele ser el middleware de permisos rebotando al usuario del monitoreo.
+      if (resultado.status >= 300 && resultado.status < 400 && resultado.location) {
+        return { ok: false, motivo: `${base} → redirige a '${resultado.location}'` };
+      }
+      return { ok: false, motivo: base };
     }
   }
 
@@ -118,7 +136,10 @@ export function cumpleEspera(espera = {}, resultado) {
 
   if (Array.isArray(espera.json_tiene) && espera.json_tiene.length > 0) {
     if (!resultado.json || typeof resultado.json !== 'object') {
-      return { ok: false, motivo: 'la respuesta no es JSON' };
+      const motivo = pareceHtml(resultado.texto)
+        ? 'la respuesta no es JSON: vino HTML (la app rebotó a una pantalla — ¿sesión vencida o sin permiso?)'
+        : 'la respuesta no es JSON';
+      return { ok: false, motivo };
     }
     for (const clave of espera.json_tiene) {
       if (!(clave in resultado.json)) return { ok: false, motivo: `falta el campo '${clave}'` };
