@@ -974,6 +974,11 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-09-14T21:02:28.621Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "LENTO",
+      "timestamp": "2026-09-16T04:57:05.174Z"
     }
   ]
 }
