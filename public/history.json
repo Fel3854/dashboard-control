@@ -1,11 +1,6 @@
 {
   "eventos": [
     {
-      "nombre": "Sistema Cubiertas",
-      "estado": "OK",
-      "timestamp": "2026-06-05T01:40:43.709Z"
-    },
-    {
       "nombre": "Controles Stock Telegram",
       "estado": "OK",
       "timestamp": "2026-06-05T01:40:43.709Z"
