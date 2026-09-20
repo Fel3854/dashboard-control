@@ -959,6 +959,11 @@
       "nombre": "Controles Stock Telegram",
       "estado": "CAIDO",
       "timestamp": "2026-09-20T06:50:19.915Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "LENTO",
+      "timestamp": "2026-09-20T16:00:47.825Z"
     }
   ]
 }
