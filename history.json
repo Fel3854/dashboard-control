@@ -989,6 +989,11 @@
       "nombre": "Controles Stock Telegram",
       "estado": "CAIDO",
       "timestamp": "2026-09-22T15:36:17.170Z"
+    },
+    {
+      "nombre": "Controles Stock Telegram",
+      "estado": "OK",
+      "timestamp": "2026-09-22T19:09:10.602Z"
     }
   ]
 }
