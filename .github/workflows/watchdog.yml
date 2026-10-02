@@ -1,0 +1,134 @@
+name: Watchdog
+
+# "Quien vigila al vigilante": destraba el checker si una corrida de Check & Deploy queda colgada.
+# check.yml usa el grupo de concurrencia `pages` sin cancel-in-progress: si un run se queda en
+# `queued`/`in_progress` sin avanzar, los siguientes quedan `pending` detras y se van cancelando
+# entre si -> el checker deja de correr EN SILENCIO (incidente 2026-09-24: el run #1597 quedo
+# `queued` sin runner y el panel estuvo casi 8 dias congelado).
+# Este workflow NO usa ese grupo ni el codigo del repo (sin checkout): solo llama a la API de
+# Actions con `gh`, asi corre aunque el checker este trabado o roto.
+on:
+  # Cada vez que se pide una corrida del checker (cron, push o "Forzar chequeo"): si habia una
+  # colgada adelante, se cancela y la recien pedida arranca sola.
+  workflow_run:
+    workflows: ['Check & Deploy']
+    types: [requested]
+  schedule:
+    - cron: '17 * * * *' # red propia, por si el checker ni siquiera llega a dispararse
+  workflow_dispatch:
+
+permissions:
+  actions: write # cancelar runs
+
+jobs:
+  destrabar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      # Un run sano tarda ~1 min y check.yml corta su job a los 45 (timeout-minutes): un run que
+      # lleva mas que esto sin cambiar de estado esta colgado.
+      UMBRAL_MIN: '60'
+    steps:
+      - name: Cancelar corridas colgadas de Check & Deploy
+        id: watchdog
+        run: |
+          api="repos/$GITHUB_REPOSITORY/actions"
+
+          # Solo `queued`/`in_progress`: los `pending` son las victimas (esperan el grupo), no la
+          # causa. Se mide contra updated_at (ultimo cambio de estado) y no created_at: un run que
+          # espero horas en pending y recien arranca es viejo por creacion, pero esta sano.
+          : > colgados.txt
+          for estado in queued in_progress; do
+            gh api "$api/workflows/check.yml/runs?status=$estado&per_page=100" \
+              --jq ".workflow_runs[] | select((now - (.updated_at | fromdateiso8601)) > ($UMBRAL_MIN * 60)) | \"\(.id) \(.run_number) \(.status) \(.updated_at)\"" >> colgados.txt
+          done
+          if [ ! -s colgados.txt ]; then
+            echo "Sin corridas colgadas."
+            exit 0
+          fi
+
+          sin_cancelar=""
+          : > detalle.txt
+          while read -r id numero estado desde <&3; do
+            echo "::warning::Run #$numero colgado ($estado sin avanzar desde $desde): cancelando"
+            gh api -X POST "$api/runs/$id/cancel" > /dev/null || true
+            sleep 15
+            # Un run zombi puede ignorar el cancel normal: para eso existe force-cancel.
+            if [ "$(gh api "$api/runs/$id" --jq .status)" != "completed" ]; then
+              echo "Run #$numero no respondio al cancel: force-cancel"
+              gh api -X POST "$api/runs/$id/force-cancel" > /dev/null || true
+              sleep 15
+            fi
+            if [ "$(gh api "$api/runs/$id" --jq .status)" = "completed" ]; then
+              echo "✅ Run #$numero: estaba \"$estado\" sin avanzar desde $desde. Cancelado." >> detalle.txt
+            else
+              sin_cancelar=1
+              echo "🔴 Run #$numero: está \"$estado\" sin avanzar desde $desde y NO se pudo cancelar." >> detalle.txt
+              echo "   Cancelarlo a mano: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$id" >> detalle.txt
+            fi
+          done 3< colgados.txt
+
+          if [ -n "$sin_cancelar" ]; then
+            asunto="[Master Bus][🚨 CRÍTICO] El checker está trabado y no se pudo destrabar"
+            cierre="Mientras siga así el checker NO corre: el panel queda congelado y no salen alertas."
+            echo "sin_cancelar=true" >> "$GITHUB_OUTPUT"
+          else
+            asunto="[Master Bus] 🛠 El checker estaba trabado: destrabado"
+            cierre="La corrida que estaba esperando arranca sola; el panel debería actualizarse en minutos."
+          fi
+          {
+            echo "Watchdog del Dashboard de Control — había una corrida de Check & Deploy colgada que"
+            echo "bloqueaba a todas las siguientes (el checker no corría):"
+            echo
+            cat detalle.txt
+            echo
+            echo "$cierre"
+            echo
+            echo "Actions: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions"
+          } > alerta-cuerpo.txt
+          cat alerta-cuerpo.txt
+          echo "alerta=true" >> "$GITHUB_OUTPUT"
+          echo "asunto=$asunto" >> "$GITHUB_OUTPUT"
+
+      # Mismos canales (y mismas guardas) que el checker y el canario: si el secret de un canal
+      # no esta cargado, ese envio se saltea.
+      - name: Enviar aviso por email
+        id: email
+        if: steps.watchdog.outputs.alerta == 'true' && env.MAIL_SERVER != ''
+        continue-on-error: true
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: ${{ steps.watchdog.outputs.asunto }}
+          to: ${{ secrets.MAIL_TO }}
+          from: Dashboard Control <${{ secrets.MAIL_USERNAME }}>
+          body: file://alerta-cuerpo.txt
+
+      - name: Enviar aviso por Telegram
+        id: telegram
+        if: steps.watchdog.outputs.alerta == 'true' && env.TELEGRAM_BOT_TOKEN != ''
+        continue-on-error: true
+        env:
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ASUNTO: ${{ steps.watchdog.outputs.asunto }}
+        run: |
+          { printf '%s\n\n' "$ASUNTO"; cat alerta-cuerpo.txt; } > telegram-msg.txt
+          curl -sS --fail \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text@telegram-msg.txt" \
+            --data "disable_web_page_preview=true"
+
+      # Si quedo una corrida colgada que no se pudo cancelar, el run queda en rojo (visible en
+      # Actions): hay que cancelarla a mano.
+      - name: Marcar en rojo si no se pudo destrabar
+        if: steps.watchdog.outputs.sin_cancelar == 'true'
+        run: |
+          echo "::error::Hay una corrida de Check & Deploy colgada que el watchdog no pudo cancelar."
+          exit 1
