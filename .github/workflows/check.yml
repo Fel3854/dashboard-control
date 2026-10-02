@@ -32,7 +32,8 @@ permissions:
   pages: write
   id-token: write
 
-# Evita corridas pisandose entre si (no cancela un deploy en curso).
+# Evita corridas pisandose entre si (no cancela un deploy en curso). Contracara: un run que se
+# queda colgado bloquea a todos los siguientes (quedan `pending`) -> lo destraba watchdog.yml.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -40,6 +41,12 @@ concurrency:
 jobs:
   check-and-deploy:
     runs-on: ubuntu-latest
+    # Corta un run colgado EN EJECUCION (el default de Actions es 6 h) para que no bloquee el
+    # grupo `pages`. Holgado a proposito: un run normal tarda ~1 min, pero el peor caso legitimo
+    # (todo lento con reintentos + deploy a Pages con su reintento) ronda los 30; no debe cortar
+    # al checker justo cuando todo esta caido. Un run que ni arranca (`queued`) no lo cubre esto:
+    # para eso esta watchdog.yml.
+    timeout-minutes: 45
     # MAIL_SERVER / TELEGRAM_BOT_TOKEN se exponen como env para condicionar los steps de
     # alerta: si el secret no esta configurado, env queda vacio y el envio se saltea (no
     # rompe el run). Asi ambos canales (email y Telegram) son opcionales e independientes.

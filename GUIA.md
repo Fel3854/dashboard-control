@@ -110,6 +110,12 @@ fue hace…"*, quiere decir que el robot **dejó de actualizar** el panel (hace 
 abajo puede **no ser el estado actual**, y el problema puede ser el **monitor mismo**, no los proyectos.
 Qué hacer: entrar a GitHub Actions y ver si el workflow *Check & Deploy* está corriendo o quedó en rojo.
 
+**Caso típico — corridas trabadas:** si en Actions ves una fila de corridas de *Check & Deploy*
+**canceladas** (ícono gris) con "duraciones" de horas y la última en **Pending**, hay una corrida vieja que
+quedó colgada (en *Queued*, sin arrancar nunca) y bloquea a todas las que vienen detrás: el robot no corre
+aunque nada figure en rojo. El **Watchdog** la cancela solo y te avisa. Si no lo hizo, filtrá las corridas
+por estado *Queued*, abrí esa y tocá **Cancel run**: la que estaba esperando arranca sola.
+
 ## Qué hago si veo…
 
 - 🔴 **CAÍDO** → el servicio está abajo. Abrir el proyecto, revisar su plataforma (Vercel/Render/Modal/…),
@@ -121,7 +127,8 @@ Qué hacer: entrar a GitHub Actions y ver si el workflow *Check & Deploy* está 
 - 🟡 **DESPERTANDO** → normal en servicios que se apagan solos (Render/Modal/Cloud Run). Se acomoda solo.
 - ⚪ **INACTIVO** → un proceso por lotes lleva rato sin reportar. Verificar que su tarea programada corra.
 - 🟥 **barra "datos desactualizados"** → dejó de reportar el **monitor** (no los proyectos). Revisar el
-  workflow *Check & Deploy* en GitHub Actions.
+  workflow *Check & Deploy* en GitHub Actions (si las corridas salen canceladas en fila, ver arriba
+  *corridas trabadas*).
 - ⚠️ **"cert vence en X días"** (en el detalle) → al certificado HTTPS le quedan pocos días; **renovarlo
   antes** de que venza (un cert vencido tira el servicio).
 - 🛠 **mantenimiento** → ese proyecto está en una ventana planificada: sus alertas están silenciadas a
@@ -326,6 +333,12 @@ Un monitor no sirve si se cae sin avisar. Las capas que evitan eso:
 - **Dead-man switch (opcional):** con el secret `HEALTHCHECK_URL` (un check gratis en healthchecks.io), el
   workflow "pinguea" al terminar cada corrida; si GitHub deja de correr el cron o Actions se cae,
   healthchecks.io te avisa **desde afuera de GitHub**.
+- **Watchdog (destrabe automático):** una corrida del checker que queda colgada bloquea a todas las
+  siguientes, y el monitor deja de correr **sin dar error**. El workflow `watchdog.yml` cancela las
+  corridas que llevan **más de 60 min** sin avanzar y avisa por email/Telegram; se dispara cada vez que se
+  pide un chequeo (cron, cambio o "Forzar chequeo") y además una vez por hora. Si no logra cancelarla,
+  queda en **rojo** y el aviso trae el link para cancelarla a mano. Aparte, cada corrida del checker se
+  corta sola a los **45 min**. Como vive dentro de GitHub Actions, no reemplaza al dead-man switch.
 - **Entrega garantizada:** si había una alerta y **ningún** canal la entregó (SMTP roto, etc.), el run de
   Actions queda en **rojo** (visible) en vez de tragarse el aviso en silencio.
 - **Canario semanal:** el workflow `canary-alertas.yml` manda una alerta de prueba cada lunes para confirmar

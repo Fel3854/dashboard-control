@@ -380,9 +380,18 @@ Mejoras para llevar el monitoreo al máximo, sin agregar infraestructura ni depe
   en el cron), así una regresión en la lógica de estado/alertas no llega a producción.
 - **Aviso de datos viejos:** si el `status.json` queda > 30 min sin actualizarse (el checker
   dejó de correr), el panel muestra un banner rojo de "datos desactualizados".
-- **Dead-man switch (opcional):** configurá el secret `HEALTHCHECK_URL` (un check gratis en
-  [healthchecks.io](https://healthchecks.io), período ~15 min). El workflow lo pinguea al final;
-  si GitHub deja de correr el cron, healthchecks.io te avisa **desde afuera**.
+- **Dead-man switch (opcional, muy recomendado):** configurá el secret `HEALTHCHECK_URL` (un check
+  gratis en [healthchecks.io](https://healthchecks.io)). El workflow lo pinguea al final; si GitHub
+  deja de correr el cron, healthchecks.io te avisa **desde afuera**. Período sugerido: **12 h** con
+  **1 h** de gracia: en la práctica Actions dispara el cron cada 3–8 h, no cada 10 min, así que un
+  período corto daría falsas alarmas todo el día. Es la única capa que no depende de GitHub.
+- **Watchdog (`watchdog.yml`):** una corrida colgada (ej. en `queued` sin runner) bloquea el grupo
+  de concurrencia `pages`: las siguientes quedan `pending` y se cancelan entre sí, y el checker deja
+  de correr sin que nada quede en rojo (pasó el 2026-09-24: casi 8 días de panel congelado). Este
+  workflow, que no usa ese grupo ni hace checkout, cancela (`cancel` y, si no responde,
+  `force-cancel`) los runs de `check.yml` que llevan > 60 min sin cambiar de estado y avisa por
+  email/Telegram. Se dispara con cada corrida pedida de *Check & Deploy* (`workflow_run`), una vez
+  por hora y a mano. Además el job del checker tiene `timeout-minutes: 45` (el default es 6 h).
 - **Verificación de entrega:** si había una alerta para mandar y **ningún** canal la entregó
   (SMTP roto, etc.), el run queda en **rojo** (y pinguea `HEALTHCHECK_URL/fail`). Además hay un
   **canario semanal** (`canary-alertas.yml`) que manda una alerta de prueba para confirmar canales.
