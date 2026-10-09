@@ -6,11 +6,6 @@
       "timestamp": "2026-06-05T01:40:43.709Z"
     },
     {
-      "nombre": "ERP Masterbus",
-      "estado": "OK",
-      "timestamp": "2026-06-06T11:56:38.725Z"
-    },
-    {
       "nombre": "Consultas BD Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-06-07T12:11:19.648Z"
@@ -34,11 +29,6 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-07-08T15:37:33.606Z"
-    },
-    {
-      "nombre": "ERP Masterbus",
-      "estado": "LENTO",
-      "timestamp": "2026-07-11T16:35:38.176Z"
     },
     {
       "nombre": "ERP Masterbus",
