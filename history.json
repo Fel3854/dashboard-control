@@ -929,6 +929,11 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-10-08T01:12:40.774Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "INACTIVO",
+      "timestamp": "2026-10-12T19:08:05.765Z"
     }
   ]
 }
