@@ -1,11 +1,6 @@
 {
   "eventos": [
     {
-      "nombre": "Controles Stock Telegram",
-      "estado": "OK",
-      "timestamp": "2026-06-05T01:40:43.709Z"
-    },
-    {
       "nombre": "Consultas BD Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-06-07T12:11:19.648Z"
@@ -34,11 +29,6 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-07-15T22:10:41.998Z"
-    },
-    {
-      "nombre": "Controles Stock Telegram",
-      "estado": "LENTO",
-      "timestamp": "2026-07-16T17:20:23.838Z"
     },
     {
       "nombre": "Controles Stock Telegram",
@@ -899,6 +889,11 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-10-13T01:20:05.230Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "LENTO",
+      "timestamp": "2026-10-14T18:58:41.512Z"
     }
   ]
 }
