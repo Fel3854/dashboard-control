@@ -11,11 +11,6 @@
       "timestamp": "2026-06-19T02:08:46.249Z"
     },
     {
-      "nombre": "Sistema Cubiertas",
-      "estado": "OK",
-      "timestamp": "2026-06-21T21:39:59.882Z"
-    },
-    {
       "nombre": "Capacitaciones RRHH",
       "estado": "OK",
       "timestamp": "2026-07-05T17:52:03.504Z"
@@ -894,6 +889,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-10-15T05:09:59.451Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-10-15T09:55:59.085Z"
     }
   ]
 }
