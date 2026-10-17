@@ -864,6 +864,16 @@
       "nombre": "Sistema Cubiertas",
       "estado": "LENTO",
       "timestamp": "2026-10-17T01:31:28.793Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-10-17T06:09:36.298Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-10-17T06:09:36.298Z"
     }
   ]
 }
