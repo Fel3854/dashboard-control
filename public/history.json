@@ -6,11 +6,6 @@
       "timestamp": "2026-06-07T12:11:19.648Z"
     },
     {
-      "nombre": "Rotacion",
-      "estado": "INACTIVO",
-      "timestamp": "2026-06-19T02:08:46.249Z"
-    },
-    {
       "nombre": "Capacitaciones RRHH",
       "estado": "OK",
       "timestamp": "2026-07-05T17:52:03.504Z"
@@ -29,11 +24,6 @@
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-07-20T04:09:24.498Z"
-    },
-    {
-      "nombre": "ERP Masterbus",
-      "estado": "LENTO",
-      "timestamp": "2026-07-20T12:33:41.246Z"
     },
     {
       "nombre": "ERP Masterbus",
