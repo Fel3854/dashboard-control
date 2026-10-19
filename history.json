@@ -864,6 +864,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-10-18T23:59:01.053Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "INACTIVO",
+      "timestamp": "2026-10-19T17:00:40.035Z"
     }
   ]
 }
