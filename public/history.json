@@ -32,16 +32,6 @@
     },
     {
       "nombre": "Fichadas Mantenimiento",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-07-22T17:56:35.458Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-07-22T19:36:08.553Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-07-22T21:53:23.294Z"
     },
