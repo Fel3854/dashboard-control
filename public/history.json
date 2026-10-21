@@ -859,6 +859,11 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-10-19T21:29:39.957Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-10-21T10:28:22.760Z"
     }
   ]
 }
