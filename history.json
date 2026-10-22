@@ -1,11 +1,6 @@
 {
   "eventos": [
     {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-06-07T12:11:19.648Z"
-    },
-    {
       "nombre": "Capacitaciones RRHH",
       "estado": "OK",
       "timestamp": "2026-07-05T17:52:03.504Z"
@@ -29,11 +24,6 @@
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-07-20T16:25:46.810Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-07-22T21:53:23.294Z"
     },
     {
       "nombre": "Fichadas Mantenimiento",
@@ -869,6 +859,16 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-10-21T15:32:06.063Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "LENTO",
+      "timestamp": "2026-10-22T11:38:19.817Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "DESPERTANDO",
+      "timestamp": "2026-10-22T11:38:19.817Z"
     }
   ]
 }
