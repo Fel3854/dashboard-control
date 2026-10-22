@@ -27,22 +27,12 @@
     },
     {
       "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-07-24T09:38:43.466Z"
-    },
-    {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-07-24T11:24:40.815Z"
-    },
-    {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "OK",
+      "estado": "LENTO",
       "timestamp": "2026-07-24T12:59:10.632Z"
     },
     {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "OK",
       "timestamp": "2026-07-24T12:59:10.632Z"
     },
     {
@@ -869,6 +859,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "DESPERTANDO",
       "timestamp": "2026-10-22T11:38:19.817Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-10-22T16:01:32.918Z"
     }
   ]
 }
