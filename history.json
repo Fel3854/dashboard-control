@@ -26,27 +26,7 @@
       "timestamp": "2026-07-24T22:16:49.684Z"
     },
     {
-      "nombre": "ERP Masterbus",
-      "estado": "OK",
-      "timestamp": "2026-07-25T15:41:09.600Z"
-    },
-    {
       "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-07-27T11:26:50.341Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-07-29T06:17:42.797Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-07-29T09:17:13.044Z"
-    },
-    {
-      "nombre": "ERP Masterbus",
       "estado": "LENTO",
       "timestamp": "2026-07-29T09:17:13.044Z"
     },
@@ -874,6 +854,11 @@
       "nombre": "Consultas BD Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-10-27T06:04:16.910Z"
+    },
+    {
+      "nombre": "Consultas BD Mantenimiento",
+      "estado": "OK",
+      "timestamp": "2026-10-27T12:03:40.981Z"
     }
   ]
 }
