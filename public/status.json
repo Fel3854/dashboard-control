@@ -1,25 +1,25 @@
 {
-  "timestamp": "2026-10-29T21:00:24.947Z",
+  "timestamp": "2026-10-30T00:54:55.695Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
-      "estado": "LENTO",
-      "latencia_ms": 6181,
+      "estado": "OK",
+      "latencia_ms": 1713,
       "http_code": 200,
       "plataforma": "Vercel",
-      "desde": "2026-10-29T21:00:24.947Z",
+      "desde": "2026-10-30T00:54:55.695Z",
       "salud": {
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 6
+        "uptime_s": 1
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + cubiertas montadas de una unidad (valida login, DB y lógica)",
-        "duracion_ms": 598,
+        "duracion_ms": 772,
         "desde": "2026-09-14T21:02:28.621Z"
       },
       "tls": {
@@ -37,7 +37,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 273,
+      "latencia_ms": 265,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-10-27T12:03:40.981Z",
@@ -45,17 +45,17 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 281860
+        "uptime_s": 295926
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 331,
+        "duracion_ms": 219,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
         "valido_hasta": "Dec 20 23:04:28 2026 GMT",
-        "dias_para_vencer": 52
+        "dias_para_vencer": 51
       },
       "uptimes": {
         "7": 100,
@@ -68,14 +68,14 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 108,
+      "latencia_ms": 80,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-09-22T19:09:10.602Z",
       "salud": null,
       "tls": {
-        "valido_hasta": "Dec 21 18:37:44 2026 GMT",
-        "dias_para_vencer": 52
+        "valido_hasta": "Dec 30 19:07:21 2026 GMT",
+        "dias_para_vencer": 61
       },
       "uptimes": {
         "7": 100,
@@ -87,18 +87,18 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
-      "estado": "DESPERTANDO",
-      "latencia_ms": 231,
+      "estado": "LENTO",
+      "latencia_ms": 5104,
       "http_code": 200,
       "plataforma": "Modal",
-      "desde": "2026-10-29T21:00:24.947Z",
+      "desde": "2026-10-30T00:54:55.695Z",
       "salud": {
         "status": "ok"
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 185,
+        "duracion_ms": 486,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -116,14 +116,14 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1435,
+      "latencia_ms": 1488,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-09-10T21:11:01.080Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1230,
+        "duracion_ms": 1305,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
@@ -141,7 +141,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 582,
+      "latencia_ms": 793,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-09-22T11:25:01.081Z",
@@ -149,12 +149,12 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 192,
+        "duracion_ms": 203,
         "desde": "2026-09-12T23:11:05.764Z"
       },
       "tls": {
         "valido_hasta": "Dec 15 22:29:02 2026 GMT",
-        "dias_para_vencer": 47
+        "dias_para_vencer": 46
       },
       "uptimes": {
         "7": 100,
