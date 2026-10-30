@@ -33,16 +33,6 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
-      "timestamp": "2026-08-01T09:27:51.611Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-08-01T19:50:48.486Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
       "timestamp": "2026-08-01T20:55:53.263Z"
     },
     {
@@ -854,6 +844,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-10-30T19:03:41.010Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-10-30T22:56:46.911Z"
     }
   ]
 }
