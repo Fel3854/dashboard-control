@@ -854,6 +854,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-10-31T08:31:48.967Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-10-31T14:43:38.533Z"
     }
   ]
 }
