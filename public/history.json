@@ -32,21 +32,6 @@
     },
     {
       "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-08-03T23:44:47.234Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-08-04T15:02:21.856Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-08-04T17:00:46.912Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
       "estado": "CAIDO",
       "timestamp": "2026-08-04T18:48:14.994Z"
     },
@@ -844,6 +829,16 @@
       "nombre": "Sistema Cubiertas",
       "estado": "LENTO",
       "timestamp": "2026-11-02T09:31:08.264Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "OK",
+      "timestamp": "2026-11-02T19:46:03.219Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "INACTIVO",
+      "timestamp": "2026-11-02T19:46:03.219Z"
     }
   ]
 }
