@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-11-03T01:51:56.795Z",
+  "timestamp": "2026-11-03T09:09:53.164Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 2286,
+      "latencia_ms": 2425,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-11-02T19:46:03.219Z",
@@ -14,12 +14,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 1
+        "uptime_s": 2
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + cubiertas montadas de una unidad (valida login, DB y lógica)",
-        "duracion_ms": 696,
+        "duracion_ms": 592,
         "desde": "2026-09-14T21:02:28.621Z"
       },
       "tls": {
@@ -37,7 +37,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 199,
+      "latencia_ms": 264,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-10-27T12:03:40.981Z",
@@ -45,12 +45,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 644949
+        "uptime_s": 671224
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 149,
+        "duracion_ms": 227,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
@@ -68,7 +68,7 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 99,
+      "latencia_ms": 119,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-09-22T19:09:10.602Z",
@@ -87,18 +87,18 @@
     {
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
-      "estado": "LENTO",
-      "latencia_ms": 3549,
+      "estado": "OK",
+      "latencia_ms": 2813,
       "http_code": 200,
       "plataforma": "Modal",
-      "desde": "2026-10-31T22:18:49.772Z",
+      "desde": "2026-11-03T09:09:53.164Z",
       "salud": {
         "status": "ok"
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 116,
+        "duracion_ms": 61,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
@@ -116,14 +116,14 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1581,
+      "latencia_ms": 1423,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-09-10T21:11:01.080Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1310,
+        "duracion_ms": 1371,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
@@ -141,7 +141,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1188,
+      "latencia_ms": 646,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-09-22T11:25:01.081Z",
@@ -149,7 +149,7 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 248,
+        "duracion_ms": 188,
         "desde": "2026-09-12T23:11:05.764Z"
       },
       "tls": {
