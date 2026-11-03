@@ -32,11 +32,6 @@
     },
     {
       "nombre": "Fichadas Mantenimiento",
-      "estado": "CAIDO",
-      "timestamp": "2026-08-04T18:48:14.994Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-04T20:14:48.446Z"
     },
@@ -839,6 +834,11 @@
       "nombre": "Rotacion",
       "estado": "INACTIVO",
       "timestamp": "2026-11-02T19:46:03.219Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "OK",
+      "timestamp": "2026-11-03T01:51:56.795Z"
     }
   ]
 }
