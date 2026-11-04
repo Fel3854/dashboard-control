@@ -32,11 +32,6 @@
     },
     {
       "nombre": "ERP Masterbus",
-      "estado": "LENTO",
-      "timestamp": "2026-08-05T21:12:55.210Z"
-    },
-    {
-      "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-08-05T23:31:49.105Z"
     },
@@ -839,6 +834,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-11-03T22:16:48.320Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "DESPERTANDO",
+      "timestamp": "2026-11-04T02:26:50.756Z"
     }
   ]
 }
