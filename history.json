@@ -829,6 +829,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-11-04T22:52:02.843Z"
+    },
+    {
+      "nombre": "Capacitaciones RRHH",
+      "estado": "LENTO",
+      "timestamp": "2026-11-05T03:18:01.396Z"
     }
   ]
 }
