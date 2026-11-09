@@ -889,6 +889,11 @@
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-11-08T06:59:18.095Z"
+    },
+    {
+      "nombre": "Rotacion",
+      "estado": "INACTIVO",
+      "timestamp": "2026-11-09T20:11:23.947Z"
     }
   ]
 }
