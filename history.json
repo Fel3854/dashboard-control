@@ -904,6 +904,16 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-11-10T18:13:48.003Z"
+    },
+    {
+      "nombre": "Sistema Cubiertas",
+      "estado": "LENTO",
+      "timestamp": "2026-11-10T23:30:50.440Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-11-10T23:30:50.440Z"
     }
   ]
 }
