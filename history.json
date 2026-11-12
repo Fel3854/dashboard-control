@@ -21,11 +21,6 @@
       "timestamp": "2026-07-24T12:59:10.632Z"
     },
     {
-      "nombre": "Controles Stock Telegram",
-      "estado": "OK",
-      "timestamp": "2026-07-24T22:16:49.684Z"
-    },
-    {
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-06T10:04:36.690Z"
@@ -34,11 +29,6 @@
       "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-08-13T21:21:59.087Z"
-    },
-    {
-      "nombre": "Controles Stock Telegram",
-      "estado": "CAIDO",
-      "timestamp": "2026-08-14T04:20:00.110Z"
     },
     {
       "nombre": "Controles Stock Telegram",
@@ -914,6 +904,11 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-11-11T18:07:55.148Z"
+    },
+    {
+      "nombre": "Fichadas Mantenimiento",
+      "estado": "LENTO",
+      "timestamp": "2026-11-12T07:46:41.923Z"
     }
   ]
 }
