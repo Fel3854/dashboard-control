@@ -6,11 +6,6 @@
       "timestamp": "2026-07-05T17:52:03.504Z"
     },
     {
-      "nombre": "Sistema Cubiertas",
-      "estado": "OK",
-      "timestamp": "2026-07-20T04:09:24.498Z"
-    },
-    {
       "nombre": "Rotacion",
       "estado": "OK",
       "timestamp": "2026-07-20T16:25:46.810Z"
@@ -34,11 +29,6 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-15T14:53:07.392Z"
-    },
-    {
-      "nombre": "Sistema Cubiertas",
-      "estado": "LENTO",
-      "timestamp": "2026-08-15T19:31:01.248Z"
     },
     {
       "nombre": "Sistema Cubiertas",
