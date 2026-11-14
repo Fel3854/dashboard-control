@@ -26,29 +26,9 @@
       "timestamp": "2026-08-14T05:51:29.004Z"
     },
     {
-      "nombre": "Sistema Cubiertas",
-      "estado": "OK",
-      "timestamp": "2026-08-15T19:52:38.590Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-08-16T14:31:16.403Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-08-16T16:45:13.910Z"
-    },
-    {
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-16T17:04:49.048Z"
-    },
-    {
-      "nombre": "Sistema Cubiertas",
-      "estado": "LENTO",
-      "timestamp": "2026-08-16T18:31:59.390Z"
     },
     {
       "nombre": "Sistema Cubiertas",
