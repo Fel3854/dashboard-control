@@ -21,11 +21,6 @@
       "timestamp": "2026-08-13T21:21:59.087Z"
     },
     {
-      "nombre": "Controles Stock Telegram",
-      "estado": "OK",
-      "timestamp": "2026-08-14T05:51:29.004Z"
-    },
-    {
       "nombre": "Sistema Cubiertas",
       "estado": "OK",
       "timestamp": "2026-08-16T19:00:05.198Z"
@@ -34,11 +29,6 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-16T21:45:35.611Z"
-    },
-    {
-      "nombre": "Controles Stock Telegram",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-08-18T07:47:13.502Z"
     },
     {
       "nombre": "Controles Stock Telegram",
