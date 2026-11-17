@@ -11,24 +11,9 @@
       "timestamp": "2026-07-20T16:25:46.810Z"
     },
     {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-07-24T12:59:10.632Z"
-    },
-    {
       "nombre": "ERP Masterbus",
       "estado": "OK",
       "timestamp": "2026-08-13T21:21:59.087Z"
-    },
-    {
-      "nombre": "Sistema Cubiertas",
-      "estado": "OK",
-      "timestamp": "2026-08-16T19:00:05.198Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-08-16T21:45:35.611Z"
     },
     {
       "nombre": "Controles Stock Telegram",
@@ -36,26 +21,6 @@
       "timestamp": "2026-08-18T08:17:44.096Z"
     },
     {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-08-19T08:51:41.656Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "LENTO",
-      "timestamp": "2026-08-19T09:36:28.205Z"
-    },
-    {
-      "nombre": "Consultas BD Mantenimiento",
-      "estado": "DESPERTANDO",
-      "timestamp": "2026-08-19T11:09:56.632Z"
-    },
-    {
-      "nombre": "Fichadas Mantenimiento",
-      "estado": "OK",
-      "timestamp": "2026-08-19T11:09:56.632Z"
-    },
-    {
       "nombre": "Consultas BD Mantenimiento",
       "estado": "OK",
       "timestamp": "2026-08-19T11:41:06.627Z"
@@ -64,11 +29,6 @@
       "nombre": "Fichadas Mantenimiento",
       "estado": "LENTO",
       "timestamp": "2026-08-19T11:41:06.627Z"
-    },
-    {
-      "nombre": "Sistema Cubiertas",
-      "estado": "LENTO",
-      "timestamp": "2026-08-19T13:14:18.087Z"
     },
     {
       "nombre": "Sistema Cubiertas",
