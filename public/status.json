@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-11-28T04:00:55.549Z",
+  "timestamp": "2026-11-28T12:55:06.286Z",
   "uptime_ventana_dias": 30,
   "proyectos": [
     {
       "nombre": "Sistema Cubiertas",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1820,
+      "latencia_ms": 1698,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-11-20T02:31:08.042Z",
@@ -19,12 +19,12 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login + cubiertas montadas de una unidad (valida login, DB y lógica)",
-        "duracion_ms": 393,
+        "duracion_ms": 410,
         "desde": "2026-09-14T21:02:28.621Z"
       },
       "tls": {
         "valido_hasta": "Jan 29 11:46:09 2027 GMT",
-        "dias_para_vencer": 62
+        "dias_para_vencer": 61
       },
       "uptimes": {
         "7": 100,
@@ -37,7 +37,7 @@
       "nombre": "Consultas BD Mantenimiento",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 223,
+      "latencia_ms": 389,
       "http_code": 200,
       "plataforma": "Render",
       "desde": "2026-10-27T12:03:40.981Z",
@@ -45,12 +45,12 @@
         "status": "ok",
         "version": "1.0.0",
         "db": "ok",
-        "uptime_s": 312643
+        "uptime_s": 344694
       },
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Consulta de bases operativas (lee la DB, sin login)",
-        "duracion_ms": 213,
+        "duracion_ms": 171,
         "desde": "2026-06-29T17:15:05.246Z"
       },
       "tls": {
@@ -68,14 +68,14 @@
       "nombre": "Controles Stock Telegram",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 54,
+      "latencia_ms": 102,
       "http_code": 200,
       "plataforma": "Cloud Run",
       "desde": "2026-09-22T19:09:10.602Z",
       "salud": null,
       "tls": {
         "valido_hasta": "Jan 26 08:26:33 2027 GMT",
-        "dias_para_vencer": 59
+        "dias_para_vencer": 58
       },
       "uptimes": {
         "7": 100,
@@ -88,7 +88,7 @@
       "nombre": "Fichadas Mantenimiento",
       "tipo": "pull",
       "estado": "LENTO",
-      "latencia_ms": 9088,
+      "latencia_ms": 4127,
       "http_code": 200,
       "plataforma": "Modal",
       "desde": "2026-11-28T04:00:55.549Z",
@@ -98,12 +98,12 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Listado de sectores (API real, sin login)",
-        "duracion_ms": 263,
+        "duracion_ms": 89,
         "desde": "2026-08-04T20:14:48.446Z"
       },
       "tls": {
         "valido_hasta": "Feb  6 10:29:27 2027 GMT",
-        "dias_para_vencer": 70
+        "dias_para_vencer": 69
       },
       "uptimes": {
         "7": 100,
@@ -116,19 +116,19 @@
       "nombre": "Capacitaciones RRHH",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 1079,
+      "latencia_ms": 1235,
       "http_code": 200,
       "plataforma": "Vercel",
       "desde": "2026-11-21T15:32:44.264Z",
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real vía Supabase Auth (signInWithPassword)",
-        "duracion_ms": 1081,
+        "duracion_ms": 1192,
         "desde": "2026-08-19T12:14:10.963Z"
       },
       "tls": {
         "valido_hasta": "Jan 29 11:46:09 2027 GMT",
-        "dias_para_vencer": 62
+        "dias_para_vencer": 61
       },
       "uptimes": {
         "7": 100,
@@ -141,7 +141,7 @@
       "nombre": "ERP Masterbus",
       "tipo": "pull",
       "estado": "OK",
-      "latencia_ms": 496,
+      "latencia_ms": 717,
       "http_code": 200,
       "plataforma": "propio",
       "desde": "2026-11-21T07:29:13.291Z",
@@ -149,12 +149,12 @@
       "funcion": {
         "estado": "FUNCION_OK",
         "descripcion": "Login real (Laravel: CSRF + sesión, toca usuarios)",
-        "duracion_ms": 174,
+        "duracion_ms": 188,
         "desde": "2026-09-12T23:11:05.764Z"
       },
       "tls": {
         "valido_hasta": "Feb 14 04:54:42 2027 GMT",
-        "dias_para_vencer": 78
+        "dias_para_vencer": 77
       },
       "uptimes": {
         "7": 100,
